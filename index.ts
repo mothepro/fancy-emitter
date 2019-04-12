@@ -12,7 +12,7 @@ export interface Listener<T = void> {
     every(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
 
-export interface Broadcaster<T> {
+export interface Broadcaster<T = void> {
     activate(...arg: Parameters<OneArgFn<T>>): void
     deactivate(err: Error): void
     cancel(): void
@@ -92,6 +92,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         } catch (e) {
             if (errFn)
                 errFn(e)
+            // TODO: Continue where left off
             this.every(fn, errFn)
         }
     }
