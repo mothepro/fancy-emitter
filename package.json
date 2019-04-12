@@ -1,0 +1,17 @@
+{
+  "name": "better-emitter",
+  "author": "Maurice Prosper",
+  "description": "A new take on JavaScript's EventEmitter class. Makes use of types and the newest JS features.",
+  "keywords": ["event", "emitter", "eventemitter", "strict"],
+  "version": "0.0.0",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.6",
+    "mocha": "^6.1.2",
+    "should": "^13.2.3",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.4.3"
+  }
+}
