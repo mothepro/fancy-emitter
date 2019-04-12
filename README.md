@@ -60,9 +60,17 @@ interface Listener<T = void> {
 
 + A Broadcaster which can only trigger events.
 ```typescript
-interface Broadcaster<T> {
-    activate(...arg: Parameters<OneArgFn<T>>): void
-    deactivate(err: Error): void
-    cancel(): void
+interface Broadcaster<T = void> {
+    activate(...arg: Parameters<OneArgFn<T>>): this
+    deactivate(err: Error): this
+    cancel(): this
 }
+```
+
+In the above interfaces the `OneArgFn` type refers to a function which takes an argument if it isn't undefined.
+
+```typescript
+type OneArgFn<T> = T extends void
+    ? () => void
+    : (arg: T) => void
 ```

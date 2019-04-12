@@ -19,8 +19,8 @@ describe('Classic EventEmitter', () => {
             })
 
             action.activate()
-            action.activate()
-            action.activate()
+                .activate()
+                .activate()
         })
 
         it('should be activated more times', done => {
@@ -32,8 +32,8 @@ describe('Classic EventEmitter', () => {
             })
 
             action.activate()
-            action.activate()
-            action.activate()
+                .activate()
+                .activate()
         })
 
         it('should activate both once\'s', done => {
@@ -70,8 +70,8 @@ describe('Classic EventEmitter', () => {
             })
 
             action.activate(1)
-            action.activate(2)
-            action.activate(3)
+                .activate(2)
+                .activate(3)
         })
     })
 
@@ -86,9 +86,9 @@ describe('Classic EventEmitter', () => {
             })
 
             action.activate()
-            action.activate()
-            action.cancel()
-            action.activate()
+                .activate()
+                .cancel()
+                .activate()
         })
 
         it.skip('should activate every\'s with an error', done => {
@@ -105,10 +105,10 @@ describe('Classic EventEmitter', () => {
                 })
 
             action.activate()
-            action.activate()
-            action.activate()
-            action.deactivate(Error('nothing'))
-            action.activate()
+                .activate()
+                .activate()
+                .deactivate(Error('nothing'))
+                .activate()
         })
     })
 })
@@ -131,8 +131,8 @@ describe('New Syntax EventEmitter', () => {
         it('should be activated three times', async () => {
             setTimeout(() => {
                 action.activate()
-                action.activate()
-                action.activate()
+                    .activate()
+                    .activate()
             })
 
             let times = 0
@@ -144,9 +144,9 @@ describe('New Syntax EventEmitter', () => {
         it.skip('should be activated more times', async () => {
             setTimeout(() => {
                 action.activate()
-                action.activate()
-                action.activate()
-                action.activate()
+                    .activate()
+                    .activate()
+                    .activate()
             })
 
             let times = 0
@@ -176,9 +176,9 @@ describe('New Syntax EventEmitter', () => {
         it('should cancel an event', async () => {
             setTimeout(() => {
                 action.activate()
-                action.activate()
-                action.cancel()
-                action.activate()
+                    .activate()
+                    .cancel()
+                    .activate()
             })
 
             let times = 0
@@ -190,10 +190,10 @@ describe('New Syntax EventEmitter', () => {
         it.skip('should activate many times, deactivate, then activate again', async () => {
             setTimeout(() => {
                 action.activate()
-                action.activate()
-                action.activate()
-                action.deactivate(Error('nothing'))
-                action.activate()
+                    .activate()
+                    .activate()
+                    .deactivate(Error('nothing'))
+                    .activate()
             })
 
             let times = 0,

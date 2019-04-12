@@ -10,7 +10,9 @@
   ],
   "version": "0.0.2",
   "scripts": {
-    "test": "mocha dist/test.js"
+    "compile": "tsc",
+    "prepublish": "npm run compile",
+    "test": "npm run compile && mocha dist/test.js"
   },
   "files": [
     "dist"

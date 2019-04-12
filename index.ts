@@ -13,9 +13,9 @@ export interface Listener<T = void> {
 }
 
 export interface Broadcaster<T = void> {
-    activate(...arg: Parameters<OneArgFn<T>>): void
-    deactivate(err: Error): void
-    cancel(): void
+    activate(...arg: Parameters<OneArgFn<T>>): this
+    deactivate(err: Error): this
+    cancel(): this
 }
 
 // TODO: Cancel should not create any more promises??
@@ -47,18 +47,21 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     public activate(...arg: Parameters<OneArgFn<T>>) {
         this.resolve(...arg)
         this.makePromise()
+        return this
     }
 
     /** Throw an error for the next event. */
     public deactivate(err: Error) {
         this.reject(err)
         this.makePromise()
+        return this
     }
 
     /** Cancels the next event. */
     public cancel() {
         this.reject(Emitter.CANCEL_KEY)
         this.makePromise()
+        return this
     }
 
     /** Calls a function the next time is activated. */
