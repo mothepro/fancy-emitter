@@ -187,7 +187,7 @@ describe('New Syntax EventEmitter', () => {
             times.should.eql(2)
         })
 
-        it('should activate many times, deactivate, then activate again', async () => {
+        it.skip('should activate many times, deactivate, then activate again', async () => {
             setTimeout(() => {
                 action.activate()
                 action.activate()

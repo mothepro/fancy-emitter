@@ -45,7 +45,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
     /** Triggers an event. */
     public activate(...arg: Parameters<OneArgFn<T>>) {
-        this.resolve(arg)
+        this.resolve(...arg)
         this.makePromise()
     }
 
