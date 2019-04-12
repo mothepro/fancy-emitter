@@ -2,12 +2,19 @@
   "name": "fancy-emitter",
   "author": "Maurice Prosper",
   "description": "A new take on JavaScript's EventEmitter class. Makes use of types and the newest JS features.",
-  "keywords": ["event", "emitter", "eventemitter", "strict"],
-  "version": "0.0.0",
+  "keywords": [
+    "event",
+    "emitter",
+    "eventemitter",
+    "strict"
+  ],
+  "version": "0.0.1",
   "scripts": {
     "test": "mocha"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "mocha": "^6.1.2",
