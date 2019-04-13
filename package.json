@@ -10,10 +10,11 @@
   ],
   "version": "0.0.2",
   "scripts": {
-    "compile": "tsc",
-    "prepublish": "npm run compile",
-    "test": "npm run compile && mocha dist/test.js"
+    "pretest": "tsc",
+    "prepublish": "tsc",
+    "test": "mocha dist/test.js"
   },
+  "main": "dist/index.js",
   "files": [
     "dist"
   ],

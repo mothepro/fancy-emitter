@@ -18,10 +18,10 @@ export interface Broadcaster<T = void> {
     cancel(): this
 }
 
-// TODO: Cancel should not create any more promises??
-export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
+/** Reject an event with this error to gracefully end next iteration. */
+export class CancelledEvent extends Error {}
 
-    private static readonly CANCEL_KEY = Symbol('Gracefully ending event')
+export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
     constructor() { this.makePromise() }
 
@@ -57,11 +57,10 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         return this
     }
 
+    // TODO: Cancel should not create any more promises??
     /** Cancels the next event. */
     public cancel() {
-        this.reject(Emitter.CANCEL_KEY)
-        this.makePromise()
-        return this
+        return this.deactivate(new CancelledEvent)
     }
 
     /** Calls a function the next time is activated. */
@@ -69,8 +68,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         try {
             fn(await this.next)
         } catch (err) {
-            // Swallow Cancels
-            if (err !== Emitter.CANCEL_KEY)
+            if (!(err instanceof CancelledEvent))
                 throw err
         }
     }
@@ -112,8 +110,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
             while (true)
                 yield this.promises[current++]
         } catch (err) {
-            // Swallow Cancels
-            if (err !== Emitter.CANCEL_KEY)
+            if (!(err instanceof CancelledEvent))
                 throw err
         }
     }
