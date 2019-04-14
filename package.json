@@ -11,13 +11,13 @@
   "version": "0.0.4",
   "scripts": {
     "pretest": "tsc",
-    "prepublishOnly": "publish-please guard && tsc",
-    "test": "mocha out/test.js",
+    "prepublishOnly": "publish-please guard",
+    "test": "mocha dist/test.js",
     "publish-please": "publish-please"
   },
-  "main": "out/index.js",
+  "main": "dist/index.js",
   "files": [
-    "out"
+    "dist"
   ],
   "devDependencies": {
     "@types/mocha": "^5.2.6",
