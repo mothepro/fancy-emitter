@@ -11,8 +11,9 @@
   "version": "0.0.2",
   "scripts": {
     "pretest": "tsc",
-    "prepublish": "tsc",
-    "test": "mocha dist/test.js"
+    "prepublish": "publish-please guard && tsc",
+    "test": "mocha dist/test.js",
+    "publish-please": "publish-please"
   },
   "main": "dist/index.js",
   "files": [
@@ -24,5 +25,8 @@
     "should": "^13.2.3",
     "ts-node": "^8.0.3",
     "typescript": "^3.4.3"
+  },
+  "dependencies": {
+    "publish-please": "^5.4.3"
   }
 }
