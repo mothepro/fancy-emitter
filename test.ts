@@ -1,5 +1,5 @@
 import 'should'
-import Emitter from '.'
+import Emitter from './index' // this prevents TS5055 for `dist/index.d.ts`
 
 describe('Classic EventEmitter', () => {
 
