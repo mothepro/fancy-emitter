@@ -11,7 +11,7 @@
   "version": "0.0.6",
   "scripts": {
     "pretest": "tsc",
-    "prepublishOnly": "tsc",
+    "prepublishOnly": "npm t",
     "test": "mocha dist/test.js"
   },
   "main": "dist/index.js",

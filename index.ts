@@ -7,7 +7,7 @@ export interface Listener<T = void> {
     readonly next: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly count: number
-    once(fn: OneArgFn<T>): void
+     once(fn: OneArgFn<T>): void
     on(fn: OneArgFn<T>): void
     onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
@@ -81,7 +81,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Stops after a cancellation.
      */
     public async on(fn: OneArgFn<T>) {
-        for await (const data of this.all)
+        for await (const data of this.future)
             fn(data)
     }
 

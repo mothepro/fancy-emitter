@@ -136,6 +136,15 @@ describe('New Syntax EventEmitter', () => {
             await action.next
         })
 
+        it('promises from past should resolve', async () => {
+            let times = 0
+            action.activate().activate()
+
+            for await (let _ of action.all)
+                if (++times == 2)
+                    break
+        })
+
         it('should be activated three times', async () => {
             setTimeout(() => {
                 action.activate()
@@ -144,9 +153,17 @@ describe('New Syntax EventEmitter', () => {
             })
 
             let times = 0
-            for await (let _ of action.all)
+            for await (let _ of action.future)
                 if (++times == 3)
                     break
+        })
+
+        it.skip('Determining if a promise doesn\'t resolve shouldn\'t be so hard!', async () => {
+            const a = new Emitter
+            a.activate()
+
+            a.count.should.eql(1)
+            return a.next.then(() => { throw Error('never') })
         })
 
         it.skip('should be activated more times', async () => {
@@ -158,10 +175,10 @@ describe('New Syntax EventEmitter', () => {
             })
 
             let times = 0
-            for await (let _ of action.all)
+            for await (let _ of action.future)
                 if (++times == 2)
                     break
-            for await (let _ of action.all)
+            for await (let _ of action.future)
                 if (++times == 4)
                     break
             times.should.eql(4)
@@ -190,7 +207,7 @@ describe('New Syntax EventEmitter', () => {
             })
 
             let times = 0
-            for await (let _ of action.all)
+            for await (let _ of action.future)
                 times++
             times.should.eql(2)
         })
@@ -207,7 +224,7 @@ describe('New Syntax EventEmitter', () => {
             let times = 0,
                 gotError = false
             try {
-                for await (let _ of action.all)
+                for await (let _ of action.future)
                     times++
             } catch (e) {
                 gotError = true
