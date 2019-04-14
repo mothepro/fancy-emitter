@@ -12,12 +12,12 @@
   "scripts": {
     "pretest": "tsc",
     "prepublish": "publish-please guard && tsc",
-    "test": "mocha dist/test.js",
+    "test": "mocha out/test.js",
     "publish-please": "publish-please"
   },
-  "main": "dist/index.js",
+  "main": "out/index.js",
   "files": [
-    "dist"
+    "out"
   ],
   "devDependencies": {
     "@types/mocha": "^5.2.6",

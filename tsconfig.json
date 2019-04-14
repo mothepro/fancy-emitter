@@ -2,16 +2,12 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "esnext",
-    "outDir": "dist",
+    "outDir": "out",
     "sourceMap": true,
     "strict": true,
     "declaration": true,
     "lib": ["esnext", "es2018", "esnext.asynciterable", "dom"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
-  },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  }
 }
