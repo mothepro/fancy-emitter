@@ -8,7 +8,7 @@
     "eventemitter",
     "strict"
   ],
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "pretest": "tsc",
     "prepublishOnly": "publish-please guard && tsc",
