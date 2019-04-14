@@ -8,10 +8,10 @@
     "eventemitter",
     "strict"
   ],
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "pretest": "tsc",
-    "prepublish": "publish-please guard && tsc",
+    "prepublishOnly": "publish-please guard && tsc",
     "test": "mocha out/test.js",
     "publish-please": "publish-please"
   },
