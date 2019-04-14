@@ -91,9 +91,9 @@ describe('Classic EventEmitter', () => {
                 .activate()
         })
 
-        it.skip('should activate every\'s with an error', done => {
+        it('should continue activate even after an error', done => {
             let times = 0
-            action.every(
+            action.onContinueAfterError(
                 () => {
                     if (times++ == 100)
                         done()
@@ -108,6 +108,14 @@ describe('Classic EventEmitter', () => {
                 .activate()
                 .activate()
                 .deactivate(Error('nothing'))
+                .activate()
+        })
+
+        it('should continue activate even after a cancellation', done => {
+            action.onContinueAfterError(done, err => done(err))
+
+            action.activate()
+                .cancel('nothing')
                 .activate()
         })
     })

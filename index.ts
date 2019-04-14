@@ -9,7 +9,7 @@ export interface Listener<T = void> {
     readonly count: number
     once(fn: OneArgFn<T>): void
     on(fn: OneArgFn<T>): void
-    every(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
+    onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
 
 export interface Broadcaster<T = void> {
@@ -29,7 +29,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
     private resolve!: Function
 
-    private promises: Promise<T>[] = []
+    private readonly promises: Promise<T>[] = []
 
     /**
      * Resolves when event is activated.
@@ -37,8 +37,11 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      */
     get next() { return this.promises[this.count] }
 
-    /** Async generator which listens to all events. */
-    get all() { return this.promiseGenerator() }
+    /** Iterator over ALL events which have occurred and will occur. */
+    get all() { return this.promiseGenerator(0) }
+
+    /** Iterator over the FUTURE events which will occur. */
+    get future() { return this.promiseGenerator(this.count) }
 
     /** The number of times this event has been activated or deactivated. */
     get count() { return this.promises.length - 1 }
@@ -59,8 +62,8 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
     // TODO: Cancel should not create any more promises??
     /** Cancels the next event. */
-    public cancel() {
-        return this.deactivate(new CancelledEvent)
+    public cancel(message?: string) {
+        return this.deactivate(new CancelledEvent(message))
     }
 
     /** Calls a function the next time is activated. */
@@ -83,19 +86,26 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     }
 
     /**
-     * Calls a function every time an event is activated
-     * Continues even after a cancellation.
+     * Calls a function every time an event is activated.
+     * Continues even after a deactivation.
+     * However it stops once Cancelled.
      */
-    public async every(fn: OneArgFn<T>, errFn?: OneArgFn<Error>) {
-        try {
-            for await (const data of this.all)
-                fn(data)
-        } catch (e) {
-            if (errFn)
-                errFn(e)
-            // TODO: Continue where left off
-            this.every(fn, errFn)
+    public async onContinueAfterError(fn: OneArgFn<T>, errFn?: OneArgFn<Error>) {
+        const eventGenerator = this.promiseGenerator.bind(this)
+        async function recursiveEventListener(current: number) {
+            try {
+                for await (const data of eventGenerator(current)) {
+                    fn(data)
+                    current++
+                }
+            } catch (e) {
+                if (errFn)
+                    errFn(e)
+                recursiveEventListener(current + 1)
+            }
         }
+
+        recursiveEventListener(this.count)
     }
 
     private makePromise() {
@@ -105,7 +115,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         }))
     }
 
-    private async* promiseGenerator(current = this.count): AsyncIterableIterator<T> {
+    private async* promiseGenerator(current: number): AsyncIterableIterator<T> {
         try {
             while (true)
                 yield this.promises[current++]
