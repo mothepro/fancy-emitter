@@ -1,5 +1,5 @@
 import 'should'
-import Emitter from './index' // this prevents TS5055 for `dist/index.d.ts`
+import Emitter, {CancelledEvent} from './index' // this prevents TS5055 for `dist/index.d.ts`
 
 describe('Classic EventEmitter', () => {
 
@@ -9,6 +9,27 @@ describe('Classic EventEmitter', () => {
         it('should be activated once', done => {
             action.once(done)
             action.activate()
+        })
+
+        it('should be activated once and cancellable', done => {
+            action.onceCancellable(done)
+            action.activate()
+        })
+
+        it('should not be activated with onceCancellable', done => {
+            const cancel = action.onceCancellable(() => done(Error('never be called')))
+            cancel()
+            setTimeout(done, 50)
+        })
+
+        // TODO: handle failed async functions
+        it.skip('should not be activated with onceCancellable and throw', () => {
+            async function fn() {
+                action.onceCancellable(() => Error('never be called'))
+                action.deactivate(Error('Deactivation'))
+            }
+
+            return fn().should.be.rejected()
         })
 
         it('should be activated three times', done => {

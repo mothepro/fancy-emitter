@@ -7,7 +7,8 @@ export interface Listener<T = void> {
     readonly next: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly count: number
-     once(fn: OneArgFn<T>): void
+    once(fn: OneArgFn<T>): void
+    onceCancellable(fn: OneArgFn<T>): Function
     on(fn: OneArgFn<T>): void
     onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
@@ -18,12 +19,20 @@ export interface Broadcaster<T = void> {
     cancel(): this
 }
 
+/** Throws an error if it isn't cancellable. */
+function throwError(err: Error) {
+    if (!(err instanceof CancelledEvent))
+        throw err
+}
+
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {}
 
 export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
-    constructor() { this.makePromise() }
+    constructor() {
+        this.makePromise()
+    }
 
     private reject!: Function
 
@@ -70,11 +79,26 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     public async once(fn: OneArgFn<T>) {
         try {
             fn(await this.next)
-        } catch (err) {
-            if (!(err instanceof CancelledEvent))
-                throw err
-        }
+        } catch (err) { throwError(err) }
     }
+
+    /**
+     * Calls a function every time an event is activated.
+     * Stops after a cancellation.
+     *
+     * @returns a `Function` to cancel *this* specific listener.
+     */
+    public onceCancellable(fn: OneArgFn<T>) {
+        let killer: (message?: string) => any
+
+        Promise.race([
+            this.next,
+            new Promise((_, reject) => killer = (msg?: string) => reject(new CancelledEvent(msg))),
+        ]).then(fn as any, throwError)
+
+        return killer!
+    }
+
 
     /**
      * Calls a function every time an event is activated.
@@ -119,9 +143,6 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         try {
             while (true)
                 yield this.promises[current++]
-        } catch (err) {
-            if (!(err instanceof CancelledEvent))
-                throw err
-        }
+        } catch (err) { throwError(err) }
     }
 }
