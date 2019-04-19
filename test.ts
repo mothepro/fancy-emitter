@@ -186,6 +186,22 @@ describe('New Syntax EventEmitter', () => {
             a.count.should.eql(1)
             return a.next.then(() => { throw Error('never') })
         })
+        
+        it('should be activated multiple times then cancel', done => {
+            let times = 0
+            const cancel = action.onCancellable(() => times++)
+
+            action.activate().activate()
+            setTimeout(() => {
+                cancel('stop')
+                action.activate()
+                
+                setTimeout(() => {
+                    times.should.eql(2)
+                    done()
+                })
+            })
+        })
 
         it.skip('should be activated more times', async () => {
             setTimeout(() => {

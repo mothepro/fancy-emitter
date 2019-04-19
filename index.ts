@@ -2,14 +2,16 @@
 type OneArgFn<T> = T extends void
     ? () => void
     : (arg: T) => void
+type ErrorFn = (message?: string) => void
 
 export interface Listener<T = void> {
     readonly next: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly count: number
     once(fn: OneArgFn<T>): void
-    onceCancellable(fn: OneArgFn<T>): Function
+    onceCancellable(fn: OneArgFn<T>): ErrorFn
     on(fn: OneArgFn<T>): void
+    onCancellable(fn: OneArgFn<T>): ErrorFn
     onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
 
@@ -83,9 +85,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     }
 
     /**
-     * Calls a function every time an event is activated.
-     * Stops after a cancellation.
-     *
+     * Calls a function the next time an event is activated.
      * @returns a `Function` to cancel *this* specific listener.
      */
     public onceCancellable(fn: OneArgFn<T>) {
@@ -107,6 +107,25 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     public async on(fn: OneArgFn<T>) {
         for await (const data of this.future)
             fn(data)
+    }
+
+    /**
+     * Calls a function every time an event is activated.
+     * Stops after a cancellation.
+     * @returns a `Function` to cancel *this* specific listener at
+     *      the end of the current thread. Activations have priority over canceller.
+     */
+    public onCancellable(fn: OneArgFn<T>) {
+        let killer!: Function
+        const rejector: Promise<never> = new Promise(
+            (_, reject) => killer = (msg?: string) => reject(new CancelledEvent(msg)))
+
+        ;(async function(promiseGenerator, count) {
+            for await (const data of promiseGenerator(count, rejector))
+                fn(data)
+        })(this.promiseGenerator.bind(this), this.count)
+
+        return (msg?: string) => killer(new CancelledEvent(msg))
     }
 
     /**
@@ -139,10 +158,17 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         }))
     }
 
-    private async* promiseGenerator(current: number): AsyncIterableIterator<T> {
+    private async* promiseGenerator(
+        current: number,
+        racer?: Promise<never>
+    ): AsyncIterableIterator<T> {
         try {
-            while (true)
-                yield this.promises[current++]
+            if (racer)
+                while (true) // earlier promise has priority
+                    yield Promise.race([this.promises[current++], racer])
+            else
+                while (true)
+                    yield this.promises[current++]
         } catch (err) { throwError(err) }
     }
 }
