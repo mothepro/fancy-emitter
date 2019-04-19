@@ -1,5 +1,5 @@
 import 'should'
-import Emitter, {CancelledEvent} from './index' // this prevents TS5055 for `dist/index.d.ts`
+import Emitter from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
 
 describe('Classic EventEmitter', () => {
 

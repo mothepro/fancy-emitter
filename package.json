@@ -12,7 +12,7 @@
   "scripts": {
     "pretest": "tsc",
     "prepublishOnly": "npm t",
-    "test": "mocha dist/test.js"
+    "test": "mocha -r ts-node/register test.ts"
   },
   "main": "dist/index.js",
   "files": [
@@ -22,8 +22,7 @@
     "@types/mocha": "^5.2.6",
     "mocha": "^6.1.2",
     "should": "^13.2.3",
-    "ts-node": "^8.0.3",
+    "ts-node": "^8.1.0",
     "typescript": "^3.4.3"
-  },
-  "dependencies": {}
+  }
 }
