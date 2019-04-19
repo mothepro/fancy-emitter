@@ -6,7 +6,9 @@ type OneArgFn<T> = T extends void
 export interface Listener<T = void> {
     readonly next: Promise<T>
     readonly all: AsyncIterableIterator<T>
+    readonly future: AsyncIterableIterator<T>
     readonly count: number
+
     once(fn: OneArgFn<T>): void
     onceCancellable(fn: OneArgFn<T>): Function
     on(fn: OneArgFn<T>): void

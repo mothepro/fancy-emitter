@@ -77,8 +77,16 @@ The emitter is the union between two interfaces.
 + A Listener, which only detects when an event occurred.
 ```typescript
 interface Listener<T = void> {
+    // Resolves when event is activated. Rejects when event is deactivated or cancelled.
     readonly next: Promise<T>
+
+    // Iterator over ALL events which have occurred and will occur.
     readonly all: AsyncIterableIterator<T>
+
+    // Iterator over the FUTURE events which will occur.
+    readonly future: AsyncIterableIterator<T>
+
+    // The number of times this event has been activated or deactivated.
     readonly count: number
     
     once(fn: OneArgFn<T>): void
