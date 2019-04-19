@@ -26,6 +26,7 @@ for await (const value of action.all)
 Then activate the emitter whenever you please `action.activate(12)`
 
 The loop listeners may be gracefully broken out of with `action.cancel()`
+or by throwing an error with `action.deactivate(Error('err'))`.
 
 ### Classic
 This can also be used like a classic event emitter with callbacks set to the `on` and `once` methods.
@@ -102,4 +103,10 @@ In the above interfaces the `OneArgFn` type refers to a function which takes an 
 type OneArgFn<T> = T extends void
     ? () => void
     : (arg: T) => void
+```
+
+## CDN
+Use the CDN from unpkg!
+```html
+<script src="//unpkg.com/fancy-emitter@0.0.7/dist/index.js"></script>
 ```
