@@ -2,16 +2,15 @@
 type OneArgFn<T> = T extends void
     ? () => void
     : (arg: T) => void
-type ErrorFn = (message?: string) => void
 
 export interface Listener<T = void> {
     readonly next: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly count: number
     once(fn: OneArgFn<T>): void
-    onceCancellable(fn: OneArgFn<T>): ErrorFn
+    onceCancellable(fn: OneArgFn<T>): Function
     on(fn: OneArgFn<T>): void
-    onCancellable(fn: OneArgFn<T>): ErrorFn
+    onCancellable(fn: OneArgFn<T>): Function
     onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
 
@@ -19,12 +18,6 @@ export interface Broadcaster<T = void> {
     activate(...arg: Parameters<OneArgFn<T>>): this
     deactivate(err: Error): this
     cancel(): this
-}
-
-/** Throws an error if it isn't cancellable. */
-function throwError(err: Error) {
-    if (!(err instanceof CancelledEvent))
-        throw err
 }
 
 /** Reject an event with this error to gracefully end next iteration. */
@@ -81,7 +74,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     public async once(fn: OneArgFn<T>) {
         try {
             fn(await this.next)
-        } catch (err) { throwError(err) }
+        } catch (err) { Emitter.throwError(err) }
     }
 
     /**
@@ -89,12 +82,11 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * @returns a `Function` to cancel *this* specific listener.
      */
     public onceCancellable(fn: OneArgFn<T>) {
-        let killer: (message?: string) => any
+        let killer: Function
+        const rejector: Promise<never> = new Promise(
+            (_, reject) => killer = () => reject(new CancelledEvent))
 
-        Promise.race([
-            this.next,
-            new Promise((_, reject) => killer = (msg?: string) => reject(new CancelledEvent(msg))),
-        ]).then(fn as any, throwError)
+        Promise.race([this.next, rejector]).then(fn, Emitter.throwError)
 
         return killer!
     }
@@ -116,16 +108,20 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      *      the end of the current thread. Activations have priority over canceller.
      */
     public onCancellable(fn: OneArgFn<T>) {
+        type promiseGenerator = (current: number, racer?: Promise<never>) => AsyncIterableIterator<T>
+
         let killer!: Function
         const rejector: Promise<never> = new Promise(
-            (_, reject) => killer = (msg?: string) => reject(new CancelledEvent(msg)))
+            (_, reject) => killer = () => reject(new CancelledEvent))
 
-        ;(async function(promiseGenerator, count) {
+        async function runner(promiseGenerator: promiseGenerator, count: number) {
             for await (const data of promiseGenerator(count, rejector))
                 fn(data)
-        })(this.promiseGenerator.bind(this), this.count)
+        }
+        
+        runner(this.promiseGenerator.bind(this), this.count)
 
-        return (msg?: string) => killer(new CancelledEvent(msg))
+        return () => killer(new CancelledEvent)
     }
 
     /**
@@ -151,6 +147,12 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         recursiveEventListener(this.count)
     }
 
+    /** Throws an error if it isn't cancellable. */
+    private static throwError(err: Error) {
+        if (!(err instanceof CancelledEvent))
+            throw err
+    }
+
     private makePromise() {
         this.promises.push(new Promise((resolve, reject) => {
             this.resolve = resolve
@@ -169,6 +171,6 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
             else
                 while (true)
                     yield this.promises[current++]
-        } catch (err) { throwError(err) }
+        } catch (err) { Emitter.throwError(err) }
     }
 }

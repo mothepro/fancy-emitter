@@ -193,7 +193,7 @@ describe('New Syntax EventEmitter', () => {
 
             action.activate().activate()
             setTimeout(() => {
-                cancel('stop')
+                cancel()
                 action.activate()
                 
                 setTimeout(() => {

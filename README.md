@@ -29,8 +29,6 @@ The loop listeners may be gracefully broken out of with `action.cancel()`
 
 ### Classic
 This can also be used like a classic event emitter with callbacks set to the `on` and `once` methods.
-
-Example:
 ```typescript
 const action = new Emitter<string>()
 
@@ -40,12 +38,42 @@ action.activate('hello')
 action.activate('world')
 ```
 
+These listeners provide more functionality in that they can be cancelled.
+```typescript
+const action = new Emitter<string>()
+
+const cancel = action.onCancellable(data => console.log(data))
+action.once(str => {
+    if (str == 'world')
+        cancel()
+})
+
+action.activate('hello')
+action.activate('world')
+
+action.activate('this will be shown')
+setTimeout(() => action.activate('but this won\'t. Since it occurs AFTER the cancel has time to propagate'))
+```
+
+Listeners can also be continued after an error occurs.
+```typescript
+const action = new Emitter<number>()
+
+action.on(data => console.log(data)) // 1 2
+action.onContinueAfterError(
+    data => console.log(data),
+    err => console.warn(err)) // 1 2 error 3
+
+action.activate(1)
+action.activate(2)
+action.deactivate(Error('error'))
+action.activate(3)
+```
 
 ## API
 The emitter is the union between two interfaces.
 
 + A Listener, which only detects when an event occurred.
-
 ```typescript
 interface Listener<T = void> {
     readonly next: Promise<T>
@@ -53,8 +81,10 @@ interface Listener<T = void> {
     readonly count: number
     
     once(fn: OneArgFn<T>): void
+    onceCancellable(fn: OneArgFn<T>): Function
     on(fn: OneArgFn<T>): void
-    every(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
+    onCancellable(fn: OneArgFn<T>): Function
+    onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
 }
 ```
 
@@ -67,8 +97,7 @@ interface Broadcaster<T = void> {
 }
 ```
 
-In the above interfaces the `OneArgFn` type refers to a function which takes an argument if it isn't undefined.
-
+In the above interfaces the `OneArgFn` type refers to a function which takes an argument iff it isn't `void`.
 ```typescript
 type OneArgFn<T> = T extends void
     ? () => void
