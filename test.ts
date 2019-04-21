@@ -1,10 +1,18 @@
-import 'should'
+import { fail } from 'should'
 import Emitter from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
 
-describe('Classic EventEmitter', () => {
+/*
+ * `setTimeout` is used to run a function after the listeners are put in place.
+ * In practice this would never need to be done since the thread activating the
+ * event is not the same as the one listening.
+ */
 
-    describe('Standard', () => {
-        const action = new Emitter
+describe('Empty Emitter', () => {
+
+    let action: Emitter
+    beforeEach(() => action = new Emitter)
+
+    describe('Classical Listeners', () => {
 
         it('should be activated once', done => {
             action.once(done)
@@ -18,18 +26,22 @@ describe('Classic EventEmitter', () => {
 
         it('should not be activated with onceCancellable', done => {
             const cancel = action.onceCancellable(() => done(Error('never be called')))
+            action.once(done)
+
             cancel()
-            setTimeout(done, 50)
+            action.activate()
         })
 
-        // TODO: handle failed async functions
-        it.skip('should not be activated with onceCancellable and throw', () => {
-            async function fn() {
-                action.onceCancellable(() => Error('never be called'))
-                action.deactivate(Error('Deactivation'))
-            }
+        it('should not be activated with onceCancellable and throw', async () => {
+            setTimeout(() => action.deactivate(Error('Deactivation')))
 
-            return fn().should.be.rejected()
+            try {
+                action.onceCancellable(() => Error('never be called'))
+                await action.next
+                fail('Should not resolve', false)
+            } catch(e) {
+                e.message.should.eql('Deactivation')
+            }
         })
 
         it('should be activated three times', done => {
@@ -39,9 +51,8 @@ describe('Classic EventEmitter', () => {
                     done()
             })
 
-            action.activate()
-                .activate()
-                .activate()
+            action.activate().activate().activate()
+            action.count.should.eql(3)
         })
 
         it('should be activated more times', done => {
@@ -52,9 +63,7 @@ describe('Classic EventEmitter', () => {
                     done()
             })
 
-            action.activate()
-                .activate()
-                .activate()
+            action.activate().activate().activate()
         })
 
         it('should activate both once\'s', done => {
@@ -67,38 +76,11 @@ describe('Classic EventEmitter', () => {
             action.once(hit)
 
             action.activate()
+            action.count.should.eql(1)
         })
     })
 
-    describe('With a value', () => {
-        const action = new Emitter<number>()
-
-        it('should be activated once with 12', done => {
-            action.once(val => {
-                if(val == 12)
-                    done()
-            })
-            action.activate(12)
-        })
-
-        it('should be activated three times increasing', done => {
-            let lastVal = 0
-            action.on(val => {
-                if (val == lastVal + 1)
-                    lastVal = val
-                if (lastVal == 3)
-                    done()
-            })
-
-            action.activate(1)
-                .activate(2)
-                .activate(3)
-        })
-    })
-
-    describe('Error Handling', () => {
-        const action = new Emitter
-
+    describe('Classical Error Handling', () => {
         it('should cancel an event', done => {
             let times = 0
             action.on(() => {
@@ -140,16 +122,8 @@ describe('Classic EventEmitter', () => {
                 .activate()
         })
     })
-})
 
-/**
- * `setTimeout` is used to run a function after the listeners are put in place.
- * In practice this would never need to be done since the thread activating the
- * event is not the same as the one listening.
- */
-describe('New Syntax EventEmitter', () => {
-
-    describe('Empty', () => {
+    describe('Fancy Listeners', () => {
         const action = new Emitter
 
         it('promise should resolve', async () => {
@@ -167,24 +141,12 @@ describe('New Syntax EventEmitter', () => {
         })
 
         it('should be activated three times', async () => {
-            setTimeout(() => {
-                action.activate()
-                    .activate()
-                    .activate()
-            })
+            setTimeout(() => action.activate().activate().activate())
 
             let times = 0
             for await (let _ of action.future)
                 if (++times == 3)
                     break
-        })
-
-        it.skip('Determining if a promise doesn\'t resolve shouldn\'t be so hard!', async () => {
-            const a = new Emitter
-            a.activate()
-
-            a.count.should.eql(1)
-            return a.next.then(() => { throw Error('never') })
         })
         
         it('should be activated multiple times then cancel', done => {
@@ -202,46 +164,17 @@ describe('New Syntax EventEmitter', () => {
                 })
             })
         })
-
-        it.skip('should be activated more times', async () => {
-            setTimeout(() => {
-                action.activate()
-                    .activate()
-                    .activate()
-                    .activate()
-            })
-
-            let times = 0
-            for await (let _ of action.future)
-                if (++times == 2)
-                    break
-            for await (let _ of action.future)
-                if (++times == 4)
-                    break
-            times.should.eql(4)
-        })
     })
 
-    describe('With a value', () => {
-        const action = new Emitter<number>()
-
-        it('should be activated once with 12', async () => {
-            setTimeout(() => action.activate(12))
-            const val = await action.next
-            val.should.eql(12)
-        })
-    })
-
-    describe('Error Handling', () => {
+    describe('Fancy Error Handling', () => {
         const action = new Emitter
 
         it('should cancel an event', async () => {
-            setTimeout(() => {
+            setTimeout(() =>
                 action.activate()
                     .activate()
                     .cancel()
-                    .activate()
-            })
+                    .activate())
 
             let times = 0
             for await (let _ of action.future)
@@ -249,14 +182,13 @@ describe('New Syntax EventEmitter', () => {
             times.should.eql(2)
         })
 
-        it.skip('should activate many times, deactivate, then activate again', async () => {
-            setTimeout(() => {
+        it('should activate many times, then deactivate', async () => {
+            setTimeout(() =>
                 action.activate()
                     .activate()
                     .activate()
                     .deactivate(Error('nothing'))
-                    .activate()
-            })
+                    .activate())
 
             let times = 0,
                 gotError = false
@@ -266,10 +198,55 @@ describe('New Syntax EventEmitter', () => {
             } catch (e) {
                 gotError = true
                 e.message.should.eql('nothing')
-                await action.next
             }
+
             times.should.eql(3)
             gotError.should.be.true()
         })
+    })
+})
+
+describe('Emitter with a value', () => {
+
+    let action: Emitter<number>
+    beforeEach(() => action = new Emitter)
+
+    it('Classic, should be activated once with 12', done => {
+        action.once(val => {
+            if(val == 12)
+                done()
+        })
+        action.activate(12)
+    })
+
+    it('Fancy, should be activated once with 12', async () => {
+        setTimeout(() => action.activate(12))
+        const val = await action.next
+        val.should.eql(12)
+    })
+
+    it('Classic, should be activated three times increasing', done => {
+        let lastVal = 0
+        action.on(val => {
+            if (val == lastVal + 1)
+                lastVal = val
+            if (lastVal == 3)
+                done()
+        })
+
+        action.activate(1)
+            .activate(2)
+            .activate(3)
+    })
+
+    it('Fancy, Promise should not resolve unless listened to first', async () => {
+        const a = new Emitter<string>()
+        setTimeout(() => a.activate('after'))
+
+        a.activate('before')
+        a.count.should.eql(1)
+
+        const str = await a.next
+        str.should.eql('after')
     })
 })

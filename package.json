@@ -10,8 +10,7 @@
   ],
   "version": "0.0.7",
   "scripts": {
-    "pretest": "tsc",
-    "prepublishOnly": "npm t",
+    "prepublishOnly": "tsc && npm t",
     "test": "mocha -r ts-node/register test.ts"
   },
   "main": "dist/index.js",
