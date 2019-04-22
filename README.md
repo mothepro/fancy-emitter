@@ -86,6 +86,9 @@ interface Listener<T = void> {
     // Iterator over the FUTURE events which will occur.
     readonly future: AsyncIterableIterator<T>
 
+    // Iterator over PAST events, which have already occurred.
+    readonly past: AsyncIterableIterator<T>
+
     // The number of times this event has been activated or deactivated.
     readonly count: number
     

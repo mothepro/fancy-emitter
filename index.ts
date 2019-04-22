@@ -7,6 +7,7 @@ export interface Listener<T = void> {
     readonly next: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly future: AsyncIterableIterator<T>
+    readonly past: AsyncIterableIterator<T>
     readonly count: number
 
     once(fn: OneArgFn<T>): void
@@ -43,11 +44,17 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      */
     get next() { return this.promises[this.count] }
 
-    /** Iterator over ALL events which have occurred and will occur. */
+    /** Iterator over ALL events, which have occurred and will occur. */
     get all() { return this.promiseGenerator(0) }
 
-    /** Iterator over the FUTURE events which will occur. */
+    /** Iterator over FUTURE events, which will occur. */
     get future() { return this.promiseGenerator(this.count) }
+
+    /**
+     * Iterator over PAST events, which have already occurred.
+     * This may be useful during testing...
+     */
+    get past() { return this.pastGenerator(0, this.count) }
 
     /** The number of times this event has been activated or deactivated. */
     get count() { return this.promises.length - 1 }
@@ -173,6 +180,13 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
             else
                 while (true)
                     yield this.promises[current++]
+        } catch (err) { Emitter.throwError(err) }
+    }
+
+    private async* pastGenerator(start: number, end: number): AsyncIterableIterator<T> {
+        try {
+            for (let i = start; i < end; i++)
+                yield this.promises[i++]
         } catch (err) { Emitter.throwError(err) }
     }
 }

@@ -131,11 +131,21 @@ describe('Empty Emitter', () => {
             await action.next
         })
 
+        it('all promises should resolve', async () => {
+            let times = 0
+            action.activate().activate()
+            setTimeout(() => action.activate().activate())
+
+            for await (let _ of action.all)
+                if (++times == 4)
+                    break
+        })
+
         it('promises from past should resolve', async () => {
             let times = 0
             action.activate().activate()
 
-            for await (let _ of action.all)
+            for await (let _ of action.past)
                 if (++times == 2)
                     break
         })
