@@ -19,29 +19,24 @@ describe('Empty Emitter', () => {
             action.activate()
         })
 
-        it('should be activated once and cancellable', done => {
-            action.onceCancellable(done)
-            action.activate()
+        it('should be deactivated, never activated', done => {
+            action
+                .once(() => { throw 'should not be reached' })
+                .catch(e => {
+                    e.message.should.eql('Deactivation')
+                    done()
+                })
+
+            action.deactivate(Error('Deactivation'))
         })
+        
+        it('should be cancelled, never activated', done => {
+            action
+                .once(() => done(Error('`fn` should never be called')))
+                .catch(() => done(Error('`errFn` should never be called')))
 
-        it('should not be activated with onceCancellable', done => {
-            const cancel = action.onceCancellable(() => done(Error('never be called')))
-            action.once(done)
-
-            cancel()
-            action.activate()
-        })
-
-        it('should not be activated with onceCancellable and throw', async () => {
-            setTimeout(() => action.deactivate(Error('Deactivation')))
-
-            try {
-                action.onceCancellable(() => Error('never be called'))
-                await action.next
-                throw 'Should not be reached'
-            } catch(e) {
-                e.message.should.eql('Deactivation')
-            }
+            action.cancel()
+            done()
         })
 
         it('should be activated three times', done => {
@@ -77,6 +72,57 @@ describe('Empty Emitter', () => {
 
             action.activate()
             action.count.should.eql(1)
+        })
+
+        describe('Cancellable Emitters', () => {
+
+            it('should be activated once and not cancelled', done => {
+                action.onceCancellable(done)
+                action.activate()
+            })
+    
+            it('should be entirely cancelled before activation', done => {
+                action.onceCancellable(
+                    () => done(Error('`fn` should never be called')),
+                    () => done(Error('`errFn` should never be called')))
+    
+                action.cancel()
+                action.activate()
+                done()
+            })
+
+            it('should be cancelled before activation', done => {
+                const cancel = action.onceCancellable(
+                    () => done(Error('`fn` should never be called')),
+                    () => done(Error('`errFn` should never be called')))
+                action.once(done)
+    
+                cancel()
+                action.activate()
+            })
+
+            it('should be deactivated before activation', done => {
+                action.onceCancellable(
+                    () => done(Error('never be called')),
+                    err => {
+                        err.message.should.eql('Deactivation')
+                        done()
+                    })
+    
+                action.deactivate(Error('Deactivation'))
+            })
+    
+            it('should not be activated with onceCancellable and throw', async () => {
+                setTimeout(() => action.deactivate(Error('Deactivation')))
+    
+                try {
+                    action.onceCancellable(() => Error('never be called'))
+                    await action.next
+                    throw 'Should not be reached'
+                } catch(e) {
+                    e.message.should.eql('Deactivation')
+                }
+            })
         })
     })
 

@@ -10,11 +10,11 @@ export interface Listener<T = void> {
     readonly past: AsyncIterableIterator<T>
     readonly count: number
 
-    once(fn: OneArgFn<T>): void
-    onceCancellable(fn: OneArgFn<T>): Function
-    on(fn: OneArgFn<T>): void
-    onCancellable(fn: OneArgFn<T>): Function
-    onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
+    once(fn: OneArgFn<T>): Promise<void>
+    onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+    on(fn: OneArgFn<T>): Promise<void>
+    onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+    onContinueAfterError(fn: OneArgFn<T>, errFn: (err: Error) => void): void
 }
 
 export interface Broadcaster<T = void> {
@@ -79,15 +79,26 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         return this.deactivate(new CancelledEvent(message))
     }
 
-    /** Calls a function the next time is activated. */
+    /**
+     * Calls a function the next time is activated.
+     * 
+     * Note: To catch deactivations, add a following `.catch` call after this method.
+     */
     public async once(fn: OneArgFn<T>) {
         try {
             fn(await this.next)
-        } catch (err) { Emitter.throwError(err) }
+        } catch (err) {
+            Emitter.throwError(err)
+        }
     }
 
     /**
      * Calls a function the next time an event is activated.
+     * 
+     * @param fn The function to be called once the emitter is activated.
+     * @param errFn A function to be called if the emitter is deactivated instead of
+     *  cancelled. By default `Error`'s are swallowed, otherwise the async function
+     *  called within would cause an `UnhandledPromiseRejection`.
      * @returns a `Function` to cancel *this* specific listener.
      */
     public onceCancellable(fn: OneArgFn<T>, errFn: (err: Error) => void = () => {}) {
@@ -107,6 +118,8 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     /**
      * Calls a function every time an event is activated.
      * Stops after a cancellation.
+     * 
+     * Note: To catch deactivations, add a following `.catch` call after this method.
      */
     public async on(fn: OneArgFn<T>) {
         for await (const data of this.future)
@@ -116,6 +129,11 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     /**
      * Calls a function every time an event is activated.
      * Stops after a cancellation.
+     * 
+     * @param fn The function to be called once the emitter is activated.
+     * @param errFn A function to be called if the emitter is deactivated instead of
+     *  cancelled. By default `Error`'s are swallowed, otherwise the async function
+     *  called within would cause an `UnhandledPromiseRejection`.
      * @returns a `Function` to cancel *this* specific listener at
      *      the end of the current thread. Activations have priority over canceller.
      */

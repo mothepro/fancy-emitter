@@ -92,11 +92,11 @@ interface Listener<T = void> {
     // The number of times this event has been activated or deactivated.
     readonly count: number
     
-    once(fn: OneArgFn<T>): void
-    onceCancellable(fn: OneArgFn<T>): Function
-    on(fn: OneArgFn<T>): void
-    onCancellable(fn: OneArgFn<T>): Function
-    onContinueAfterError(fn: OneArgFn<T>, errFn: OneArgFn<Error>): void
+    once(fn: OneArgFn<T>): Promise<void>
+    onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+    on(fn: OneArgFn<T>): Promise<void>
+    onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+    onContinueAfterError(fn: OneArgFn<T>, errFn: (err: Error) => void): void
 }
 ```
 
