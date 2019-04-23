@@ -1,4 +1,4 @@
-import { fail } from 'should'
+import 'should'
 import Emitter from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
 
 /*
@@ -38,7 +38,7 @@ describe('Empty Emitter', () => {
             try {
                 action.onceCancellable(() => Error('never be called'))
                 await action.next
-                fail('Should not resolve', false)
+                throw 'Should not be reached'
             } catch(e) {
                 e.message.should.eql('Deactivation')
             }
@@ -124,7 +124,6 @@ describe('Empty Emitter', () => {
     })
 
     describe('Fancy Listeners', () => {
-        const action = new Emitter
 
         it('promise should resolve', async () => {
             setTimeout(() => action.activate())
@@ -146,8 +145,9 @@ describe('Empty Emitter', () => {
             action.activate().activate()
 
             for await (let _ of action.past)
-                if (++times == 2)
-                    break
+                times++
+            action.count.should.eql(2)
+            times.should.eql(2)
         })
 
         it('should be activated three times', async () => {
@@ -177,7 +177,6 @@ describe('Empty Emitter', () => {
     })
 
     describe('Fancy Error Handling', () => {
-        const action = new Emitter
 
         it('should cancel an event', async () => {
             setTimeout(() =>

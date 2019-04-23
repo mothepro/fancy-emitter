@@ -6,3 +6,4 @@ package-lock.json
 .nyc_output
 coverage
 .DS_Store
+*.code-workspace

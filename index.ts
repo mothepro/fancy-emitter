@@ -54,7 +54,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Iterator over PAST events, which have already occurred.
      * This may be useful during testing...
      */
-    get past() { return this.pastGenerator(0, this.count) }
+    get past() { return this.rangeGenerator(0, this.count) }
 
     /** The number of times this event has been activated or deactivated. */
     get count() { return this.promises.length - 1 }
@@ -90,12 +90,15 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Calls a function the next time an event is activated.
      * @returns a `Function` to cancel *this* specific listener.
      */
-    public onceCancellable(fn: OneArgFn<T>) {
+    public onceCancellable(fn: OneArgFn<T>, errFn: (err: Error) => void = () => {}) {
         let killer: Function
         const rejector: Promise<never> = new Promise(
             (_, reject) => killer = () => reject(new CancelledEvent))
-
-        Promise.race([this.next, rejector]).then(fn, Emitter.throwError)
+        
+        Promise.race([this.next, rejector])
+            .then(fn)
+            .catch(Emitter.throwError)
+            .catch(errFn)
 
         return killer!
     }
@@ -116,7 +119,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * @returns a `Function` to cancel *this* specific listener at
      *      the end of the current thread. Activations have priority over canceller.
      */
-    public onCancellable(fn: OneArgFn<T>) {
+    public onCancellable(fn: OneArgFn<T>, errFn: (err: Error) => void = () => {}) {
         type promiseGenerator = (current: number, racer?: Promise<never>) => AsyncIterableIterator<T>
 
         let killer!: Function
@@ -124,8 +127,12 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
             (_, reject) => killer = () => reject(new CancelledEvent))
 
         async function runner(promiseGenerator: promiseGenerator, count: number) {
-            for await (const data of promiseGenerator(count, rejector))
-                fn(data)
+            try {
+                for await (const data of promiseGenerator(count, rejector))
+                    fn(data)
+            } catch(e) {
+                errFn(e)
+            }
         }
         
         runner(this.promiseGenerator.bind(this), this.count)
@@ -183,10 +190,10 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         } catch (err) { Emitter.throwError(err) }
     }
 
-    private async* pastGenerator(start: number, end: number): AsyncIterableIterator<T> {
+    private async* rangeGenerator(start: number, end: number): AsyncIterableIterator<T> {
         try {
             for (let i = start; i < end; i++)
-                yield this.promises[i++]
+                yield this.promises[i]
         } catch (err) { Emitter.throwError(err) }
     }
 }
