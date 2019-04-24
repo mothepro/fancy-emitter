@@ -11,7 +11,7 @@
   "version": "0.0.7",
   "scripts": {
     "prepublishOnly": "tsc && npm t",
-    "test": "mocha -r ts-node/register test.ts"
+    "test": "mocha -r ts-node/register -u exports test.ts"
   },
   "main": "dist/index.js",
   "files": [

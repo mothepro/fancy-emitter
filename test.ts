@@ -1,8 +1,10 @@
 import 'should'
 import Emitter from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
 
-let action: Emitter
-let actionNumber: Emitter<number>
+// These could probably be imported from 'mocha', but I am not sure where.
+type MochaSyncTest = (done: any) => void
+type MochaAsyncTest = () => Promise<any>
+type MochaSuite = { [suite: string]: MochaSuite | MochaAsyncTest | MochaSyncTest }
 
 /**
  * Calls a function after the current thread is complete.
@@ -30,298 +32,302 @@ function deactivateLater(message?: string) {
     later(() => action.deactivate(Error(message)))
 }
 
-beforeEach(() => {
-    action = new Emitter
-    actionNumber = new Emitter
-})
+let action: Emitter
+let actionNumber: Emitter<number>
 
-describe('Classical Listeners', () => {
+export = {
+    beforeEach() {
+        action = new Emitter
+        actionNumber = new Emitter
+    },
 
-    it('should be activated once', done => {
-        action.once(done)
-        action.activate()
-    })
-
-    it('should be deactivated, never activated', done => {
-        action
-            .once(() => { throw 'should not be reached' })
-            .catch(e => {
-                e.message.should.eql('Deactivation')
-                done()
-            })
-
-        action.deactivate(Error('Deactivation'))
-    })
-    
-    it('should be cancelled, never activated', done => {
-        action
-            .once(() => done(Error('`fn` should never be called')))
-            .catch(() => done(Error('`errFn` should never be called')))
-
-        action.cancel()
-        done()
-    })
-
-    it('should be activated three times', done => {
-        let times = 0
-        action.on(() => {
-            if (++times == 3)
-                done()
-        })
-
-        action.activate().activate().activate()
-        action.count.should.eql(3)
-    })
-
-    it('should be activated more times', done => {
-        let times = 0
-        action.on(() => times++)
-        action.on(() => {
-            if(++times == 6)
-                done()
-        })
-
-        action.activate().activate().activate()
-    })
-
-    it('should activate both once\'s', done => {
-        let times = 0
-        const hit = () => {
-            if(++times >= 2)
-                done()
-        }
-        action.once(hit)
-        action.once(hit)
-
-        action.activate()
-        action.count.should.eql(1)
-    })
-
-    describe('Cancellable Emitters', () => {
-
-        it('should be activated once and not cancelled', done => {
-            action.onceCancellable(done)
-            action.activate()
-        })
-
-        it('should be entirely cancelled before activation', done => {
-            action.onceCancellable(
-                () => done(Error('`fn` should never be called')),
-                () => done(Error('`errFn` should never be called')))
-
-            action.cancel()
-            action.activate()
-            done()
-        })
-
-        it('should be cancelled before activation', done => {
-            const cancel = action.onceCancellable(
-                () => done(Error('`fn` should never be called')),
-                () => done(Error('`errFn` should never be called')))
+    'Classical Listeners': {
+        'activated once': done => {
             action.once(done)
-
-            cancel()
             action.activate()
-        })
-
-        it('should be deactivated before activation', done => {
-            action.onceCancellable(
-                () => done(Error('never be called')),
-                err => {
-                    err.message.should.eql('Deactivation')
+        },
+        
+        'deactivated, never activated': done => {
+            action
+                .once(() => { throw 'should not be reached' })
+                .catch(e => {
+                    e.message.should.eql('Deactivation')
                     done()
                 })
-
-            action.deactivate(Error('Deactivation'))
-        })
-
-        it('should not be activated with onceCancellable and throw', async () => {
-            deactivateLater('Deactivation')
-
-            try {
-                action.onceCancellable(() => Error('never be called'))
-                await action.next
-                throw 'Should not be reached'
-            } catch(e) {
-                e.message.should.eql('Deactivation')
-            }
-        })
-    })
-})
-
-describe('Classical Error Handling', () => {
-    it('should cancel an event', done => {
-        let times = 0
-        action.on(() => {
-            if(++times >= 2)
-                done()
-        })
-
-        action.activate()
-            .activate()
-            .cancel()
-            .activate()
-    })
-
-    it('should continue activate even after an error', done => {
-        let times = 0
-        action.onContinueAfterError(
-            () => {
-                if (times++ == 100)
-                    done()
-            },
-            (err) => {
-                err.should.be.an.instanceOf(Error)
-                if(times == 3)
-                    times = 100
-            })
-
-        action.activate()
-            .activate()
-            .activate()
-            .deactivate(Error('nothing'))
-            .activate()
-    })
-
-    it('should continue activate even after a cancellation', done => {
-        action.onContinueAfterError(done, err => done(err))
-
-        action.activate()
-            .cancel('nothing')
-            .activate()
-    })
-})
-
-describe('Fancy Listeners', () => {
-
-    it('promise should resolve', async () => {
-        activateLater()
-        await action.next
-    })
-
-    it('all promises should resolve', async () => {
-        let times = 0
-        action.activate().activate()
-        activateLater()
-        activateLater()
-
-        for await (let _ of action.all)
-            if (++times == 4)
-                break
-    })
-
-    it('promises from past should resolve', async () => {
-        let times = 0
-        action.activate().activate()
-
-        for await (let _ of action.past)
-            times++
-        action.count.should.eql(2)
-        times.should.eql(2)
-    })
-
-    it('should be activated three times', async () => {
-        activateLater()
-        activateLater()
-        activateLater()
-
-        let times = 0
-        for await (let _ of action.future)
-            if (++times == 3)
-                break
-    })
     
-    it('should be activated multiple times then cancel', done => {
-        let times = 0
-        const cancel = action.onCancellable(() => times++)
+            action.deactivate(Error('Deactivation'))
+        },
 
-        action.activate().activate()
-
-        later(() => {
-            cancel()
-            action.activate()
-            
-            later(() => {
-                times.should.eql(2)
-                done()
+        'cancelled, never activated': done => {
+            action
+                .once(() => done(Error('`fn` should never be called')))
+                .catch(() => done(Error('`errFn` should never be called')))
+    
+            action.cancel()
+            done()
+        },
+        
+        'activated three times': done => {
+            let times = 0
+            action.on(() => {
+                if (++times == 3)
+                    done()
             })
-        })
-    })
-})
+    
+            action.activate().activate().activate()
+            action.count.should.eql(3)
+        },
+    
+        'activated more times': done => {
+            let times = 0
+            action.on(() => times++)
+            action.on(() => {
+                if(++times == 6)
+                    done()
+            })
+    
+            action.activate().activate().activate()
+        },
+    
+        'should activate both once\'s': done => {
+            let times = 0
+            const hit = () => {
+                if(++times >= 2)
+                    done()
+            }
+            action.once(hit)
+            action.once(hit)
+    
+            action.activate()
+            action.count.should.eql(1)
+        },
 
-describe('Fancy Error Handling', () => {
+        'Cancellable Emitters': {
+            'activated once and not cancelled': done => {
+                action.onceCancellable(done)
+                action.activate()
+            },
 
-    it('should cancel an event', async () => {
-        activateLater()
-        activateLater()
-        cancelLater()
-        activateLater()
+            'entirely cancelled before activation': done => {
+                action.onceCancellable(
+                    () => done(Error('`fn` should never be called')),
+                    () => done(Error('`errFn` should never be called')))
 
-        let times = 0
-        for await (let _ of action.future)
-            times++
-        times.should.eql(2)
-    })
+                action.cancel()
+                action.activate()
+                done()
+            },
 
-    it('should activate many times, then deactivate', async () => {
-        activateLater()
-        activateLater()
-        activateLater()
-        deactivateLater('nothing')
-        activateLater()
+            'cancelled before activation': done => {
+                const cancel = action.onceCancellable(
+                    () => done(Error('`fn` should never be called')),
+                    () => done(Error('`errFn` should never be called')))
+                action.once(done)
 
-        let times = 0,
-            gotError = false
-        try {
+                cancel()
+                action.activate()
+            },
+
+            'deactivated before activation': done => {
+                action.onceCancellable(
+                    () => done(Error('never be called')),
+                    err => {
+                        err.message.should.eql('Deactivation')
+                        done()
+                    })
+
+                action.deactivate(Error('Deactivation'))
+            },
+
+            'deactivation throws, never activats onceCancellable': async () => {
+                deactivateLater('Deactivation')
+
+                try {
+                    action.onceCancellable(() => Error('never be called'))
+                    await action.next
+                    throw 'Should not be reached'
+                } catch(e) {
+                    e.message.should.eql('Deactivation')
+                }
+            },
+        },
+    },
+
+    'Classical Error Handling': {
+        'cancel an event': done => {
+            let times = 0
+            action.on(() => {
+                if(++times >= 2)
+                    done()
+            })
+    
+            action.activate()
+                .activate()
+                .cancel()
+                .activate()
+        },
+    
+        'continue activate even after an error': done => {
+            let times = 0
+            action.onContinueAfterError(
+                () => {
+                    if (times++ == 100)
+                        done()
+                },
+                (err) => {
+                    err.should.be.an.instanceOf(Error)
+                    if(times == 3)
+                        times = 100
+                })
+    
+            action.activate()
+                .activate()
+                .activate()
+                .deactivate(Error('nothing'))
+                .activate()
+        },
+    
+        'continue activate even after a cancellation': done => {
+            action.onContinueAfterError(
+                () => action.count == 3 && done(),
+                err => done(err))
+    
+            action.activate()
+                .cancel('nothing')
+                .activate()
+        },
+    },
+
+    'Fancy Listeners': {
+        'promise should resolve': async () => {
+            activateLater()
+            await action.next
+        },
+    
+        'all promises should resolve': async () => {
+            let times = 0
+            action.activate().activate()
+            activateLater()
+            activateLater()
+    
+            for await (let _ of action.all)
+                if (++times == 4)
+                    break
+        },
+    
+        'promises from past should resolve': async () => {
+            let times = 0
+            action.activate().activate()
+    
+            for await (let _ of action.past)
+                times++
+            action.count.should.eql(2)
+            times.should.eql(2)
+        },
+    
+        'activated three times': async () => {
+            activateLater()
+            activateLater()
+            activateLater()
+    
+            let times = 0
+            for await (let _ of action.future)
+                if (++times == 3)
+                    break
+        },
+        
+        'activated multiple times then cancel': async () => {
+            let times = 0
+            const cancel = action.onCancellable(() => times++)
+    
+            action.activate().activate()
+    
+            return new Promise(resolve =>{
+                later(() => {
+                    cancel()
+                    action.activate()
+                    
+                    later(() => {
+                        times.should.eql(2)
+                        resolve()
+                    })
+                })
+            })
+        },
+    },
+
+    'Fancy Error Handling': {
+        'should cancel an event': async () => {
+            activateLater()
+            activateLater()
+            cancelLater()
+            activateLater()
+
+            let times = 0
             for await (let _ of action.future)
                 times++
-        } catch (e) {
-            gotError = true
-            e.message.should.eql('nothing')
-        }
+            times.should.eql(2)
+        },
 
-        times.should.eql(3)
-        gotError.should.be.true()
-    })
-})
+        'should activate many times, then deactivate': async () => {
+            activateLater()
+            activateLater()
+            activateLater()
+            deactivateLater('nothing')
+            activateLater()
 
-describe('Emitter with a value', () => {
+            let times = 0,
+                gotError = false
+            try {
+                for await (let _ of action.future)
+                    times++
+            } catch (e) {
+                gotError = true
+                e.message.should.eql('nothing')
+            }
 
-    it('Classic, should be activated once with 12', done => {
-        actionNumber.once(val => {
-            if(val == 12)
-                done()
-        })
-        actionNumber.activate(12)
-    })
+            times.should.eql(3)
+            gotError.should.be.true()
+        },
+    },
 
-    it('Fancy, should be activated once with 12', async () => {
-        activateLater(12)
-        const val = await actionNumber.next
-        val.should.eql(12)
-    })
+    'Emitter with a value': {
+        'Classic, activated once with 12': done => {
+            actionNumber.once(val => {
+                if(val == 12)
+                    done()
+            })
+            actionNumber.activate(12)
+        },
 
-    it('Classic, should be activated three times increasing', done => {
-        let lastVal = 0
-        actionNumber.on(val => {
-            if (val == lastVal + 1)
-                lastVal = val
-            if (lastVal == 3)
-                done()
-        })
+        'Fancy, activated once with 12': async () => {
+            activateLater(12)
+            const val = await actionNumber.next
+            val.should.eql(12)
+        },
 
-        actionNumber.activate(1)
-            .activate(2)
-            .activate(3)
-    })
+        'Classic, activated three times increasing': done => {
+            let lastVal = 0
+            actionNumber.on(val => {
+                if (val == lastVal + 1)
+                    lastVal = val
+                if (lastVal == 3)
+                    done()
+            })
 
-    it('Fancy, Promise should not resolve unless listened to first', async () => {
-        activateLater(55)
+            actionNumber.activate(1)
+                .activate(2)
+                .activate(3)
+        },
 
-        actionNumber.activate(-100)
-        actionNumber.count.should.eql(1)
+        'Fancy, Promise should not resolve unless listened to first': async () => {
+            activateLater(55)
 
-        const num = await actionNumber.next
-        num.should.eql(55)
-    })
-})
+            actionNumber.activate(-100)
+            actionNumber.count.should.eql(1)
+
+            const num = await actionNumber.next
+            num.should.eql(55)
+        },
+    },
+} as MochaSuite
