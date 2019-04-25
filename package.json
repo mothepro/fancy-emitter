@@ -13,7 +13,7 @@
     "build:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
     "build:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
     "build": "npm run build:dev && npm run build:prod",
-    "prepublishOnly": "tsc && npm t",
+    "prepublishOnly": "tsc && npm run build && npm t",
     "test": "mocha -r ts-node/register -u exports test.ts"
   },
   "main": "dist/index.js",
