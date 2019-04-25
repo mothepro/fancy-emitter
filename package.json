@@ -10,6 +10,9 @@
   ],
   "version": "0.0.7",
   "scripts": {
+    "build:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
+    "build:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
+    "build": "npm run build:dev && npm run build:prod",
     "prepublishOnly": "tsc && npm t",
     "test": "mocha -r ts-node/register -u exports test.ts"
   },
@@ -21,6 +24,8 @@
     "@types/mocha": "^5.2.6",
     "mocha": "^6.1.2",
     "should": "^13.2.3",
+    "simplifyify": "^7.0.2",
+    "terser": "^3.17.0",
     "ts-node": "^8.1.0",
     "typescript": "^3.4.3"
   }

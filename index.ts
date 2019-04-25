@@ -205,13 +205,17 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
             else
                 while (true)
                     yield this.promises[current++]
-        } catch (err) { Emitter.throwError(err) }
+        } catch (err) {
+            Emitter.throwError(err)
+        }
     }
 
     private async* rangeGenerator(start: number, end: number): AsyncIterableIterator<T> {
         try {
             for (let i = start; i < end; i++)
                 yield this.promises[i]
-        } catch (err) { Emitter.throwError(err) }
+        } catch (err) {
+            Emitter.throwError(err)
+        }
     }
 }
