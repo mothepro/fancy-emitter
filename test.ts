@@ -199,9 +199,16 @@ export = {
     },
 
     'Fancy Listeners': {
-        'promise should resolve': async () => {
+        'Next promise should resolve': async () => {
             activateLater()
             await action.next
+        },
+
+        'Previous promise should resolve': () => {
+            (typeof action.previous).should.eql('undefined')
+            action.activate()
+            action.previous.should.not.equal(action.next)
+            action.previous.should.have.been.fulfilled()
         },
     
         'all promises should resolve': async () => {

@@ -5,6 +5,7 @@ type OneArgFn<T> = T extends void
 
 export interface Listener<T = void> {
     readonly next: Promise<T>
+    readonly previous: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly future: AsyncIterableIterator<T>
     readonly past: AsyncIterableIterator<T>
@@ -43,6 +44,12 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Rejects when event is deactivated or cancelled.
      */
     get next() { return this.promises[this.count] }
+
+    /**
+     * The lastest promise which has completed.
+     * Returns `undefined` if this emitter has yet to be activated, or deactived.
+     */
+    get previous() { return this.promises[this.count - 1] }
 
     /** Iterator over ALL events, which have occurred and will occur. */
     get all() { return this.promiseGenerator(0) }

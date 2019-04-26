@@ -80,6 +80,9 @@ interface Listener<T = void> {
     // Resolves when event is activated. Rejects when event is deactivated or cancelled.
     readonly next: Promise<T>
 
+    // The lastest promise which has completed, or `undefined` if activated or deactivated.
+    readonly previous: Promise<T>
+
     // Iterator over ALL events which have occurred and will occur.
     readonly all: AsyncIterableIterator<T>
 
@@ -119,5 +122,5 @@ type OneArgFn<T> = T extends void
 ## CDN
 Use the CDN from unpkg!
 ```html
-<script src="//unpkg.com/fancy-emitter@0.0.7/dist/index.js"></script>
+<script src="//unpkg.com/fancy-emitter/dist/index.js"></script>
 ```
