@@ -25,7 +25,15 @@ export interface Broadcaster<T = void> {
 }
 
 /** Reject an event with this error to gracefully end next iteration. */
-export class CancelledEvent extends Error {}
+export class CancelledEvent extends Error {
+    /** Throws an error if it isn't cancellable. Otherwise, swallows it */
+    static throwError(err: Error): never
+    static throwError(err: CancelledEvent): void
+    static throwError(err: Error) {
+        if (!(err instanceof CancelledEvent))
+            throw err
+    }
+}
 
 export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
@@ -95,7 +103,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         try {
             fn(await this.next)
         } catch (err) {
-            Emitter.throwError(err)
+            CancelledEvent.throwError(err)
         }
     }
 
@@ -115,12 +123,11 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         
         Promise.race([this.next, rejector])
             .then(fn)
-            .catch(Emitter.throwError)
+            .catch(CancelledEvent.throwError)
             .catch(errFn)
 
         return killer!
     }
-
 
     /**
      * Calls a function every time an event is activated.
@@ -188,12 +195,6 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         recursiveEventListener(this.count)
     }
 
-    /** Throws an error if it isn't cancellable. */
-    private static throwError(err: Error) {
-        if (!(err instanceof CancelledEvent))
-            throw err
-    }
-
     private makePromise() {
         this.promises.push(new Promise((resolve, reject) => {
             this.resolve = resolve
@@ -213,7 +214,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
                 while (true)
                     yield this.promises[current++]
         } catch (err) {
-            Emitter.throwError(err)
+            CancelledEvent.throwError(err)
         }
     }
 
@@ -222,7 +223,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
             for (let i = start; i < end; i++)
                 yield this.promises[i]
         } catch (err) {
-            Emitter.throwError(err)
+            CancelledEvent.throwError(err)
         }
     }
 }
