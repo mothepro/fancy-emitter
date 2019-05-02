@@ -1,7 +1,7 @@
+type Fn<T> = (arg: T) => void
+
 /** A function which takes an argument if it isn't undefined. */
-type OneArgFn<T> = T extends void
-    ? () => void
-    : (arg: T) => void
+type OneArgFn<T> = T extends void ? () => void : Fn<T>
 
 export interface Listener<T = void> {
     readonly next: Promise<T>
@@ -12,10 +12,10 @@ export interface Listener<T = void> {
     readonly count: number
 
     once(fn: OneArgFn<T>): Promise<void>
-    onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+    onceCancellable(fn: OneArgFn<T>, errFn?: Fn<Error>): Function
     on(fn: OneArgFn<T>): Promise<void>
-    onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
-    onContinueAfterError(fn: OneArgFn<T>, errFn: (err: Error) => void): void
+    onCancellable(fn: OneArgFn<T>, errFn?: Fn<Error>): Function
+    onContinueAfterError(fn: OneArgFn<T>, errFn: Fn<Error>): void
 }
 
 export interface Broadcaster<T = void> {
@@ -63,13 +63,13 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     get all() { return this.promiseGenerator(0) }
 
     /** Iterator over FUTURE events, which will occur. */
-    get future() { return this.promiseGenerator(this.count) }
+    get future() { return this.promiseGenerator() }
 
     /**
      * Iterator over PAST events, which have already occurred.
      * This may be useful during testing...
      */
-    get past() { return this.rangeGenerator(0, this.count) }
+    get past() { return this.promiseGenerator(0, undefined, this.count) }
 
     /** The number of times this event has been activated or deactivated. */
     get count() { return this.promises.length - 1 }
@@ -116,7 +116,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      *  called within would cause an `UnhandledPromiseRejection`.
      * @returns a `Function` to cancel *this* specific listener.
      */
-    public onceCancellable(fn: OneArgFn<T>, errFn: (err: Error) => void = () => {}) {
+    public onceCancellable(fn: OneArgFn<T>, errFn: Fn<Error> = () => {}) {
         let killer: Function
         const rejector: Promise<never> = new Promise(
             (_, reject) => killer = () => reject(new CancelledEvent))
@@ -151,7 +151,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * @returns a `Function` to cancel *this* specific listener at
      *      the end of the current thread. Activations have priority over canceller.
      */
-    public onCancellable(fn: OneArgFn<T>, errFn: (err: Error) => void = () => {}) {
+    public onCancellable(fn: OneArgFn<T>, errFn: Fn<Error> = () => {}) {
         type promiseGenerator = (current: number, racer?: Promise<never>) => AsyncIterableIterator<T>
 
         let killer!: Function
@@ -177,7 +177,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Continues even after a deactivation.
      * However it stops once Cancelled.
      */
-    public async onContinueAfterError(fn: OneArgFn<T>, errFn?: OneArgFn<Error>) {
+    public async onContinueAfterError(fn: OneArgFn<T>, errFn?: Fn<Error>) {
         const eventGenerator = this.promiseGenerator.bind(this)
         async function recursiveEventListener(current: number) {
             try {
@@ -203,25 +203,20 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     }
 
     private async* promiseGenerator(
-        current: number,
-        racer?: Promise<never>
+        current = this.count,
+        racer?: Promise<never>,
+        stopBefore?: number,
     ): AsyncIterableIterator<T> {
         try {
             if (racer)
                 while (true) // earlier promise has priority
                     yield Promise.race([this.promises[current++], racer])
             else
-                while (true)
+                while (true) {
+                    if (current == stopBefore)
+                        break
                     yield this.promises[current++]
-        } catch (err) {
-            CancelledEvent.throwError(err)
-        }
-    }
-
-    private async* rangeGenerator(start: number, end: number): AsyncIterableIterator<T> {
-        try {
-            for (let i = start; i < end; i++)
-                yield this.promises[i]
+                }
         } catch (err) {
             CancelledEvent.throwError(err)
         }
