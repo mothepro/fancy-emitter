@@ -13,7 +13,7 @@ export interface Listener<T = void> {
     readonly previous: Promise<T>
     readonly all: AsyncIterableIterator<T>
     readonly future: AsyncIterableIterator<T>
-    readonly past: AsyncIterableIterator<T>
+    readonly past: Promise<T>[]
     readonly count: number
 
     once(fn: OneArgFn<T>): Promise<void>
@@ -72,7 +72,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Iterator over PAST events, which have already occurred.
      * This may be useful during testing...
      */
-    get past() { return this.promiseGenerator(0, undefined, this.count) }
+    get past() { return this.promises.slice(0, this.count) }
 
     /** The number of times this event has been activated or deactivated. */
     get count() { return this.promises.length - 1 }
@@ -210,18 +210,13 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
     private async* promiseGenerator(
         current = this.count,
         racer?: Promise<never>,
-        stopBefore?: number,
     ): AsyncIterableIterator<T> {
         try {
-            if (racer)
-                while (true) // earlier promise has priority
-                    yield Promise.race([this.promises[current++], racer])
-            else
-                while (true) {
-                    if (current == stopBefore)
-                        break
-                    yield this.promises[current++]
-                }
+            while (true)
+                yield racer
+                    // earlier promise has priority in race
+                    ? Promise.race([this.promises[current++], racer])
+                    : this.promises[current++]
         } catch (err) {
             CancelledEvent.throwError(err)
         }
