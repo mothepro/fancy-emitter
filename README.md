@@ -13,7 +13,7 @@ import Emitter from 'fancy-emitter'
 const action = new Emitter<number>();
 ```
 
-Set a listener on the action. 
+Set a listener on the action.
 
 ```typescript
 const value = await action.next
@@ -33,6 +33,7 @@ The loop listeners may be gracefully broken out of with `action.cancel()`
 or by throwing an error with `action.deactivate(Error('err'))`.
 
 ### Classic
+
 This can also be used like a classic event emitter with callbacks set to the `on` and `once` methods.
 
 ```typescript

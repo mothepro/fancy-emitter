@@ -3,10 +3,10 @@ type ErrFn = (err: Error) => void
 /** A function which takes an argument if it isn't undefined. */
 type OneArgFn<T> =
     Extract<T, void> extends never
-        ? (arg: T) => void
+        ? (arg: T) => void      // T does NOT have void in it
         : Exclude<T, void> extends never
-            ? () => void
-            : (arg?: T) => void
+            ? () => void        // T is ONLY void
+            : (arg?: T) => void // T is a combination of void and non void
 
 export interface Listener<T = void> {
     readonly next: Promise<T>
