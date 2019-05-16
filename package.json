@@ -8,7 +8,7 @@
     "eventemitter",
     "strict"
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "build:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
     "build:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
