@@ -108,7 +108,7 @@ interface Listener<T = void> {
     onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
     on(fn: OneArgFn<T>): Promise<void>
     onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
-    onContinueAfterError(fn: OneArgFn<T>, errFn: (err: Error) => void): void
+    onContinueAfterError(fn: OneArgFn<T>, errFn?: (err: Error) => void): void
 }
 ```
 
@@ -123,11 +123,15 @@ interface Broadcaster<T = void> {
 ```
 
 In the above interfaces the `OneArgFn` type refers to a function which takes an argument iff it isn't `void`.
+It uses an optional argument if a union with void and another value is present.
 
 ```typescript
-type OneArgFn<T> = T extends void
-    ? () => void
-    : (arg: T) => void
+type OneArgFn<T> =
+    Extract<T, void> extends never
+        ? (arg: T) => void
+        : Exclude<T, void> extends never
+            ? () => void
+            : (arg?: T) => void
 ```
 
 ## CDN

@@ -1,21 +1,12 @@
-type Fn<T> = (arg: T) => void
+type ErrFn = (err: Error) => void
 
 /** A function which takes an argument if it isn't undefined. */
 type OneArgFn<T> =
     Extract<T, void> extends never
-        ? Fn<T>
+        ? (arg: T) => void
         : Exclude<T, void> extends never
             ? () => void
-            : (arg?: Exclude<T, void>) => void
-
-/** The value an emitter returns. */
-type Unpack<E> = E extends Emitter<infer T>
-    ? Exclude<T, void> // NonNullable<T>
-    : never
-
-type NonNeverKeys<T> = { [P in keyof T]: T[P] extends never ? never : P }[keyof T]
-type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
-type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
+            : (arg?: T) => void
 
 export interface Listener<T = void> {
     readonly next: Promise<T>
@@ -26,10 +17,10 @@ export interface Listener<T = void> {
     readonly count: number
 
     once(fn: OneArgFn<T>): Promise<void>
-    onceCancellable(fn: OneArgFn<T>, errFn?: Fn<Error>): Function
+    onceCancellable(fn: OneArgFn<T>, errFn?: ErrFn): Function
     on(fn: OneArgFn<T>): Promise<void>
-    onCancellable(fn: OneArgFn<T>, errFn?: Fn<Error>): Function
-    onContinueAfterError(fn: OneArgFn<T>, errFn?: Fn<Error>): void
+    onCancellable(fn: OneArgFn<T>, errFn?: ErrFn): Function
+    onContinueAfterError(fn: OneArgFn<T>, errFn?: ErrFn): void
 }
 
 export interface Broadcaster<T = void> {
@@ -114,7 +105,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      */
     public async once(fn: OneArgFn<T>) {
         try {
-            fn(await this.next as T & undefined)
+            fn(await this.next)
         } catch (err) {
             CancelledEvent.throwError(err)
         }
@@ -129,13 +120,13 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      *  called within would cause an `UnhandledPromiseRejection`.
      * @returns a `Function` to cancel *this* specific listener.
      */
-    public onceCancellable(fn: OneArgFn<T>, errFn: Fn<Error> = () => { }) {
+    public onceCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }) {
         let killer: Function
         const rejector: Promise<never> = new Promise(
             (_, reject) => killer = () => reject(new CancelledEvent))
 
         Promise.race([this.next, rejector])
-            .then(fn as Fn<T>)
+            .then(fn)
             .catch(CancelledEvent.throwError)
             .catch(errFn)
 
@@ -150,7 +141,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      */
     public async on(fn: OneArgFn<T>) {
         for await (const data of this.future)
-            fn(data as T & undefined)
+            fn(data)
     }
 
     /**
@@ -164,7 +155,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * @returns a `Function` to cancel *this* specific listener at
      *      the end of the current thread. Activations have priority over canceller.
      */
-    public onCancellable(fn: OneArgFn<T>, errFn?: Fn<Error>) {
+    public onCancellable(fn: OneArgFn<T>, errFn?: ErrFn) {
         type promiseGenerator = (current: number, racer?: Promise<never>) => AsyncIterableIterator<T>
 
         let killer!: Function
@@ -174,7 +165,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         async function runner(promiseGenerator: promiseGenerator, count: number) {
             try {
                 for await (const data of promiseGenerator(count, rejector))
-                    fn(data as T & undefined)
+                    fn(data)
             } catch (e) {
                 if (errFn)
                     errFn(e)
@@ -191,12 +182,12 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      * Continues even after a deactivation.
      * However it stops once Cancelled.
      */
-    public async onContinueAfterError(fn: OneArgFn<T>, errFn?: Fn<Error>) {
+    public async onContinueAfterError(fn: OneArgFn<T>, errFn?: ErrFn) {
         const eventGenerator = this.promiseGenerator.bind(this)
         async function recursiveEventListener(current: number) {
             try {
                 for await (const data of eventGenerator(current)) {
-                    fn(data as T & undefined)
+                    fn(data)
                     current++
                 }
             } catch (e) {
@@ -236,6 +227,15 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         }
     }
 }
+
+/** The value an emitter returns. */
+type Unpack<E> = E extends Emitter<infer T>
+    ? Exclude<T, void> // NonNullable<T>
+    : never
+
+type NonNeverKeys<T> = { [P in keyof T]: T[P] extends never ? never : P }[keyof T]
+type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
+type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
 
 /** The return value for a merged emitter. */
 type OneOfEmitters<T> = {
