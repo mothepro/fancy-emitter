@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "mocha": "^6.1.2",
+    "np": "^5.0.1",
     "should": "^13.2.3",
     "simplifyify": "^7.0.2",
     "terser": "^3.17.0",

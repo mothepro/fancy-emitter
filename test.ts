@@ -1,5 +1,5 @@
 import 'should'
-import Emitter from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
+import Emitter, { merge } from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
 
 // These could probably be imported from 'mocha', but I am not sure where.
 type MochaSyncTest = (done: any) => void
@@ -46,7 +46,7 @@ export = {
             action.once(done)
             action.activate()
         },
-        
+
         'deactivated, never activated': done => {
             action
                 .once(() => { throw 'should not be reached' })
@@ -54,7 +54,7 @@ export = {
                     e.message.should.eql('Deactivation')
                     done()
                 })
-    
+
             action.deactivate(Error('Deactivation'))
         },
 
@@ -62,42 +62,42 @@ export = {
             action
                 .once(() => done(Error('`fn` should never be called')))
                 .catch(() => done(Error('`errFn` should never be called')))
-    
+
             action.cancel()
             done()
         },
-        
+
         'activated three times': done => {
             let times = 0
             action.on(() => {
                 if (++times == 3)
                     done()
             })
-    
+
             action.activate().activate().activate()
             action.count.should.eql(3)
         },
-    
+
         'activated more times': done => {
             let times = 0
             action.on(() => times++)
             action.on(() => {
-                if(++times == 6)
+                if (++times == 6)
                     done()
             })
-    
+
             action.activate().activate().activate()
         },
-    
+
         'should activate both once\'s': done => {
             let times = 0
             const hit = () => {
-                if(++times >= 2)
+                if (++times >= 2)
                     done()
             }
             action.once(hit)
             action.once(hit)
-    
+
             action.activate()
             action.count.should.eql(1)
         },
@@ -146,7 +146,7 @@ export = {
                     action.onceCancellable(() => Error('never be called'))
                     await action.next
                     throw 'Should not be reached'
-                } catch(e) {
+                } catch (e) {
                     e.message.should.eql('Deactivation')
                 }
             },
@@ -157,16 +157,16 @@ export = {
         'cancel an event': done => {
             let times = 0
             action.on(() => {
-                if(++times >= 2)
+                if (++times >= 2)
                     done()
             })
-    
+
             action.activate()
                 .activate()
                 .cancel()
                 .activate()
         },
-    
+
         'continue activate even after an error': done => {
             let times = 0
             action.onContinueAfterError(
@@ -176,22 +176,22 @@ export = {
                 },
                 (err) => {
                     err.should.be.an.instanceOf(Error)
-                    if(times == 3)
+                    if (times == 3)
                         times = 100
                 })
-    
+
             action.activate()
                 .activate()
                 .activate()
                 .deactivate(Error('nothing'))
                 .activate()
         },
-    
+
         'continue activate even after a cancellation': done => {
             action.onContinueAfterError(
                 () => action.count == 3 && done(),
                 err => done(err))
-    
+
             action.activate()
                 .cancel('nothing')
                 .activate()
@@ -210,50 +210,50 @@ export = {
             action.previous.should.not.equal(action.next)
             action.previous.should.have.been.fulfilled()
         },
-    
+
         'all promises should resolve': async () => {
             let times = 0
             action.activate().activate()
             activateLater()
             activateLater()
-    
+
             for await (let _ of action.all)
                 if (++times == 4)
                     break
         },
-    
+
         'promises from past should resolve': async () => {
             let times = 0
             action.activate().activate()
-    
+
             for await (let _ of action.past)
                 times++
             action.count.should.eql(2)
             times.should.eql(2)
         },
-    
+
         'activated three times': async () => {
             activateLater()
             activateLater()
             activateLater()
-    
+
             let times = 0
             for await (let _ of action.future)
                 if (++times == 3)
                     break
         },
-        
+
         'activated multiple times then cancel': async () => {
             let times = 0
             const cancel = action.onCancellable(() => times++)
-    
+
             action.activate().activate()
-    
-            return new Promise(resolve =>{
+
+            return new Promise(resolve => {
                 later(() => {
                     cancel()
                     action.activate()
-                    
+
                     later(() => {
                         times.should.eql(2)
                         resolve()
@@ -301,7 +301,7 @@ export = {
     'Emitter with a value': {
         'Classic, activated once with 12': done => {
             actionNumber.once(val => {
-                if(val == 12)
+                if (val == 12)
                     done()
             })
             actionNumber.activate(12)
@@ -336,5 +336,31 @@ export = {
             const num = await actionNumber.next
             num.should.eql(55)
         },
+    },
+
+    'Merged Emitter': done => {
+        const merged = merge({ action, actionNumber })
+        let actionTimes = 0,
+            actionNumberTimes = 0
+
+        merged.on(({ name, value }) => {
+            if (value != undefined) {
+                actionNumberTimes++
+                name.should.eql('actionNumber')
+                value.should.eql(12)
+            } else {
+                actionTimes++
+                name.should.eql('action')
+            }
+
+            if (actionTimes >= 2 && actionNumberTimes >= 2)
+                done()
+        })
+
+        activateLater()
+        merged.activate({ name: 'action' })
+
+        activateLater(12)
+        merged.activate({ name: 'actionNumber', value: 12 })
     },
 } as MochaSuite
