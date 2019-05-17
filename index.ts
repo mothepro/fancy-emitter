@@ -8,14 +8,19 @@ type OneArgFn<T> =
             ? () => void        // T is ONLY void
             : (arg?: T) => void // T is a combination of void and non void
 
+/** Keys of an interface whose values are not `never`. */
+type NonNeverKeys<T> = { [P in keyof T]: T[P] extends never ? never : P }[keyof T]
+
+/** Keys of an interface whose values are `never`. */
+type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
+
+/** Make the Keys with a `never` value optional. */
+type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
+
 /** The value an emitter returns. */
 type Unpack<E> = E extends Emitter<infer T>
-    ? Exclude<T, void> // NonNullable<T>
+    ? Exclude<T, void> // NonNullable<T> should work
     : never
-
-type NonNeverKeys<T> = { [P in keyof T]: T[P] extends never ? never : P }[keyof T]
-type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
-type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
 
 /** The return value for a merged emitter. */
 type OneOfEmitters<T> = {
@@ -46,11 +51,20 @@ export interface Broadcaster<T = void> {
     cancel(): this
 }
 
+/**
+ * A new light weight take on Node JS's EventEmitter class.
+ * 
+ * FancyEmitter is strongly typed and makes use of ES7 features such as:
+ *  + Promises / asynchronous functions
+ *  + Generators
+ *  + for-of-await
+ */
+//TODO: Clear the promises member when they are no longer needed.
 export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
 
     /** Reject an event with this error to gracefully end next iteration. */
-    static CancelledEvent = class extends Error {
-        /** Throws an error if it isn't cancellable. Otherwise, swallows it */
+    private static CancelledEvent = class extends Error {
+        /** Swallows cancelled errors, otherwise rethrows it. */
         static throwError(err: Error) {
             if (!(err instanceof Emitter.CancelledEvent))
                 throw err
@@ -71,6 +85,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
                     ret.deactivate(err)
                 }
             )
+        
         return ret
     }
 
@@ -124,8 +139,8 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         return this
     }
 
-    // TODO: Cancel should not create any more promises??
     /** Cancels the next event. */
+    // TODO: Cancel should not create any more promises?
     public cancel(message?: string) {
         return this.deactivate(new Emitter.CancelledEvent(message))
     }
@@ -185,7 +200,7 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
      *  cancelled. By default `Error`'s are swallowed, otherwise the async function
      *  called within would cause an `UnhandledPromiseRejection`.
      * @returns a `Function` to cancel *this* specific listener at
-     *      the end of the current thread. Activations have priority over canceller.
+     *  the end of the current thread. Activations have priority over canceller.
      */
     public onCancellable(fn: OneArgFn<T>, errFn?: ErrFn) {
         type promiseGenerator = (current: number, racer?: Promise<never>) => AsyncIterableIterator<T>
@@ -246,8 +261,9 @@ export default class Emitter<T = void> implements Listener<T>, Broadcaster<T> {
         try {
             while (true)
                 yield racer
-                    // earlier promise has priority in race
-                    ? Promise.race([this.promises[current++], racer])
+                    ? Promise.race([
+                        this.promises[current++], // this has priority over racer 
+                        racer])
                     : this.promises[current++]
         } catch (err) {
             Emitter.CancelledEvent.throwError(err)
