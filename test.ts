@@ -1,5 +1,5 @@
 import 'should'
-import Emitter, { merge } from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
+import Emitter from './index' // vs. '.'. This prevents TS5055 for `dist/index.d.ts`
 
 // These could probably be imported from 'mocha', but I am not sure where.
 type MochaSyncTest = (done: any) => void
@@ -339,7 +339,7 @@ export = {
     },
 
     'Merged Emitter': done => {
-        const merged = merge({ action, actionNumber })
+        const merged = Emitter.merge({ action, actionNumber })
         let actionTimes = 0,
             actionNumberTimes = 0
 
