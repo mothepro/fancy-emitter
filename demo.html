@@ -1,29 +1,36 @@
-<input id="txt" />
-<button id="activate">Activate</button>
-<button id="deactivate">Dectivate</button>
-<pre id="logs"></pre>
+<form onsubmit="return false">
+    <input id="txt" autofocus />
+    <button type="submit" id="activate">Activate</button>
+    <button type="reset" id="deactivate">Dectivate</button>
+</form>
+<hr/>
+<pre id="log1"></pre>
+<hr/>
+<pre id="log2"></pre>
 
 <script type="module">
-    import SafeEmitter from './dist/src/SafeEmitter.js'
+    import SafeEmitter from './dist/src/Emitter.js'
 
     const emitter = new SafeEmitter
 
     document.getElementById('activate').onclick = () => emitter.activate(document.getElementById('txt').value)
     document.getElementById('deactivate').onclick = () => emitter.deactivate(Error('stopped by user'))
 
-    function log(data) {
-        document.getElementById('logs').innerHTML += '\n' + data
+    function log(element, data) {
+        element.innerHTML += '\n' + data
     }
 
-    async function start() {
+    async function start(element) {
+        log(element, 'Start loggin here:')
         try {
             for await (const data of emitter)
-                log(`>\t${data}`)
+                log(element, `>\t${data}`)
         } catch (error) {
-            log(`ERR >\t${error}`)
+            log(element, `ERR >\t${error}`)
         }
-        log('DONE')
+        log(element, 'DONE')
     }
 
-    start()
+    start(document.getElementById('log1'))
+    start(document.getElementById('log2'))
 </script>
