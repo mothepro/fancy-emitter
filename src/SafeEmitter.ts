@@ -9,13 +9,13 @@ import { OneArgFn } from './types'
  *  + Generators
  *  + for-of-await
  */
-export default class d<T = void> implements AsyncIterable<T> {
+export default class <T = void> implements AsyncIterable<T> {
 
     constructor() { this.makePromise() }
 
     protected reject!: Function
 
-    private resolve!: Function
+    protected resolve!: Function
 
     protected readonly queue: Promise<T>[] = []
 
@@ -51,17 +51,10 @@ export default class d<T = void> implements AsyncIterable<T> {
     }
 
     /** Add a new promise to the queue and save its resolve and rejector */
-    private makePromise() {
+    protected makePromise() {
         this.queue.push(new Promise((resolve, reject) => {
             this.resolve = resolve
             this.reject = reject
         }))
     }
 }
-
-declare global {
-    interface Window {
-        pootis: typeof d
-    }
-}
-window.pootis = d
