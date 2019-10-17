@@ -1,30 +1,29 @@
-<input id="txt">
+<input id="txt" />
 <button id="activate">Activate</button>
 <button id="deactivate">Dectivate</button>
-<pre id="log"></pre>
+<pre id="logs"></pre>
 
-<script src="https://unpkg.com/fancy-emitter/dist/umd/index.min.js"></script>
+<script type="module">
+    import SafeEmitter from './dist/src/SafeEmitter.js'
 
-<script>
-    const action = new emitter.default,
-        log = document.getElementById('log'),
-        txt = document.getElementById('txt')
-        
-    document.getElementById('activate')
-        .onclick = () => action.activate(txt.value)
-        
-    document.getElementById('deactivate')
-        .onclick = () => action.deactivate(Error(txt.value))
+    const emitter = new SafeEmitter
 
-    async function write() {
-        try {
-            for await (const data of action.all)
-                log.innerHTML = `${data}\n${log.innerHTML}`
-        } catch (e) {
-            log.innerHTML = `----\n${e}\n----\n\n${log.innerHTML}`
-        }
-        log.innerHTML = `DONE\n${log.innerHTML}`
+    document.getElementById('activate').onclick = () => emitter.activate(document.getElementById('txt').value)
+    document.getElementById('deactivate').onclick = () => emitter.deactivate(Error('stopped by user'))
+
+    function log(data) {
+        document.getElementById('logs').innerHTML += '\n' + data
     }
-    
-    write()
+
+    async function start() {
+        try {
+            for await (const data of emitter)
+                log(`>\t${data}`)
+        } catch (error) {
+            log(`ERR >\t${error}`)
+        }
+        log('DONE')
+    }
+
+    start()
 </script>
