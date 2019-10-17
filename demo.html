@@ -2,6 +2,7 @@
     <input id="txt" autofocus />
     <button type="submit" id="activate">Activate</button>
     <button type="reset" id="deactivate">Dectivate</button>
+    <button type="reset" id="cancel">Cancel</button>
 </form>
 <hr/>
 <pre id="log1"></pre>
@@ -9,19 +10,20 @@
 <pre id="log2"></pre>
 
 <script type="module">
-    import SafeEmitter from './dist/src/Emitter.js'
+    import Emitter from './dist/src/Emitter.js'
 
-    const emitter = new SafeEmitter
+    const emitter = new Emitter
 
     document.getElementById('activate').onclick = () => emitter.activate(document.getElementById('txt').value)
     document.getElementById('deactivate').onclick = () => emitter.deactivate(Error('stopped by user'))
+    document.getElementById('cancel').onclick = () => emitter.cancel()
 
     function log(element, data) {
         element.innerHTML += '\n' + data
     }
 
     async function start(element) {
-        log(element, 'Start loggin here:')
+        log(element, 'Start logging here:')
         try {
             for await (const data of emitter)
                 log(element, `>\t${data}`)
