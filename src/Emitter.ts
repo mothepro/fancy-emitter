@@ -65,4 +65,23 @@ export default class <T = void> extends SafeEmitter<T> {
 
         return killer!
     }
+    
+    /**
+     * Calls a function every time this is activated.
+     * Stops after a cancellation or deactivation.
+     * 
+     * @param fn The function to be called once the emitter is activated.
+     * @param errFn A function to be called if the emitter is deactivated instead of
+     *  cancelled. By default `Error`'s are swallowed, otherwise the async function
+     *  called within would cause an `UnhandledPromiseRejection`.
+     * @returns a `Function` to cancel *this* specific listener at
+     *  the end of the current thread. Note: Activations have priority over this canceller.
+     */
+    // TODO: Optimize this by having listening on the async iterable instead of cloning.
+    onCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }): () => this {
+        const clone = new exports.default
+        clone.on(fn).catch(errFn)
+        this.on(clone.activate).catch(clone.deactivate)
+        return clone.cancel
+    }
 }
