@@ -1,5 +1,10 @@
-
-import { OneArgFn } from './types'
+/** A function which takes an argument if it isn't undefined. */
+export type OneArgFn<T> =
+    Extract<T, void> extends never
+        ? (arg: T) => void      // T does NOT have void in it
+        : Exclude<T, void> extends never
+            ? () => void        // T is ONLY void
+            : (arg?: T) => void // T is a combination of void and non void
 
 /**
  * A new, light weight take on Node JS's EventEmitter class.
@@ -11,31 +16,37 @@ import { OneArgFn } from './types'
  */
 export default class <T = void> implements AsyncIterable<T> {
 
-    constructor() { this.makePromise() }
+    constructor() {
+        this.makePromise()
+        this.flusher()
+    }
 
-    protected reject!: Function
-
-    protected resolve!: Function
+    protected resolve?: Function
 
     protected readonly queue: Promise<T>[] = []
+
+    /** 
+     * Resolves next time this is activated.
+     * Throws a TypeError if this is no longer making events.
+     */
+    get next() { return this.queue[0] }
 
     /**
      * Dequeues a promise and yields it so it may be awaited on.
      * A pending promise is enqueued everytime one is resolved.
      */
-    async* [Symbol.asyncIterator]() {
+    async*[Symbol.asyncIterator]() {
         while (this.queue.length)
-            yield this.queue.shift()!
+            yield this.next
     }
-
-    /** Resolves when event is activated. */
-    get next() { return this.queue[0] }
 
     /** Triggers an event. */
     activate(...arg: Parameters<OneArgFn<T>>): this
     activate(arg?: T) {
-        this.resolve(arg)
-        this.makePromise()
+        if (this.resolve) {
+            this.resolve(arg)
+            this.makePromise()
+        }
         return this
     }
 
@@ -51,10 +62,22 @@ export default class <T = void> implements AsyncIterable<T> {
     }
 
     /** Add a new promise to the queue and save its resolve and rejector */
-    protected makePromise() {
-        this.queue.push(new Promise((resolve, reject) => {
-            this.resolve = resolve
-            this.reject = reject
-        }))
+    private makePromise() {
+        this.queue.push(new Promise(resolve => this.resolve = resolve))
+    }
+
+    /**
+     * Removes a promise from the queue as soon as it has been resolved.
+     * Anyone who listened to the promise before this point already has a
+     * reference to the promise. When all listeners have handled the result
+     * The promise can be safely GC'd.
+     * 
+     * This is hidden, so it should never throw.
+     */
+    private async flusher() {
+        try {
+            for await (const _ of this)
+                this.queue.shift()
+        } catch { }
     }
 }
