@@ -5,7 +5,9 @@ import SafeEmitter, { OneArgFn } from './SafeEmitter.js'
 type ErrFn = (err: Error) => void
 
 /** Reject an event with this error to gracefully end next iteration. */
-class CancelledEvent extends Error {}
+class CancelledEvent extends Error {
+    message = 'Cancelled emitter gracefully'
+}
 
 /** Swallows cancelled errors, rethrows all other errors. */
 function throwError(err: Error): never | void {
@@ -26,7 +28,7 @@ export default class <T = void> extends SafeEmitter<T> {
 
     /** Gracefully stops handling events. */
     cancel() {
-        return this.deactivate(new CancelledEvent('Cancelled emitter gracefully'))
+        return this.deactivate(new CancelledEvent)
     }
 
     /**

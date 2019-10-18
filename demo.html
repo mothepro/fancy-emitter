@@ -23,14 +23,14 @@
     }
 
     async function start(element) {
-        log(element, 'Start logging here:')
+        log(element, 'START')
         try {
             for await (const data of emitter)
                 log(element, `>\t${data}`)
         } catch (error) {
             log(element, `ERR >\t${error}`)
         }
-        log(element, 'DONE')
+        log(element, 'FINISH')
     }
 
     start(document.getElementById('log1'))

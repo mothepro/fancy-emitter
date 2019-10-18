@@ -74,6 +74,7 @@ export default class <T = void> implements AsyncIterable<T> {
      * 
      * This is hidden, so it should never throw.
      */
+    // TODO: maybe flushing should be done with a chained `then` instead?
     private async flusher() {
         try {
             for await (const _ of this)
