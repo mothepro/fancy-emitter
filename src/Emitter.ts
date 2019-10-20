@@ -1,5 +1,5 @@
-// `.js` is required. https://github.com/Microsoft/TypeScript/issues/13422
 import SafeEmitter, { OneArgFn } from './SafeEmitter.js'
+import clone from './clone.js'
 
 /** Function which takes an error. */
 type ErrFn = (err: Error) => void
@@ -79,9 +79,8 @@ export default class <T = void> extends SafeEmitter<T> {
      */
     // TODO: Optimize this by having listening on the async iterable instead of cloning.
     onCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }): () => this {
-        const clone = new exports.default
-        clone.on(fn).catch(errFn)
-        this.on(clone.activate).catch(clone.deactivate)
-        return clone.cancel
+        const cloned = clone(this)
+        cloned.on(fn).catch(errFn)
+        return cloned.cancel
     }
 }
