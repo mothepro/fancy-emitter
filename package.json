@@ -12,9 +12,10 @@
   "scripts": {
     "build:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
     "build:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
-    "build": "npm run build:dev && npm run build:prod",
-    "test": "mocha -r ts-node/register -u exports test.ts",
-    "prerelease": "tsc && npm run build",
+    "build:esm": "tsc -m es2015",
+    "build": "npm run build:dev && npm run build:prod && npm run build:esm",
+    "test": "mocha -r ts-node/register test/*.ts",
+    "prerelease": "npm run build",
     "release": "np"
   },
   "main": "dist/index.js",
@@ -23,12 +24,14 @@
   ],
   "devDependencies": {
     "@types/mocha": "^5.2.6",
+    "@types/should": "^13.0.0",
+    "esm": "^3.2.25",
     "mocha": "^6.1.2",
     "np": "^5.0.1",
     "should": "^13.2.3",
     "simplifyify": "^7.0.2",
     "terser": "^3.17.0",
-    "ts-node": "^8.1.0",
-    "typescript": "^3.4.3"
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
   }
 }
