@@ -33,7 +33,7 @@ type OneOfEmitters<T> = {
  *  the offending emitter. 
  * Cancellations of a given emitter do not stop the returned emitter.
  */
-export default function<Emitters extends { [name: string]: SafeEmitter<any> }>(map: Emitters) {
+export default function<E extends SafeEmitter<any>, Emitters extends { [name: string]: E }>(map: Emitters): E {
     const ret = new Emitter<OneOfEmitters<Emitters>>()
     for (const [name, emitter] of Object.entries(map))
         // Casting is required since TS doesn't know if `EmitterValue` is void or not.
@@ -44,5 +44,5 @@ export default function<Emitters extends { [name: string]: SafeEmitter<any> }>(m
                 err.emitter = name
                 ret.deactivate(err)
             })
-    return ret
+    return ret as any
 }
