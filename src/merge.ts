@@ -1,5 +1,5 @@
-import Emitter from './Emitter.js'
-import SafeEmitter from './SafeEmitter.js'
+import Emitter from './Emitter'
+import SafeEmitter from './SafeEmitter'
 
 /** Keys of an interface whose values are not `never`. */
 type NonNeverKeys<T> = { [P in keyof T]: T[P] extends never ? never : P }[keyof T]

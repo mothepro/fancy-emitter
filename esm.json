@@ -3,6 +3,7 @@
     "files": ["index.ts"],
     "compilerOptions": {
         "module": "es2015",
-        "outDir": "dist"
+        "outDir": "dist",
+        "declaration": false
     }
 }

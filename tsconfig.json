@@ -6,7 +6,6 @@
     "sourceMap": true,
     "strict": true,
     "declaration": true,
-    "declarationDir": "dist/types",
     "lib": ["esnext", "es2018", "esnext.asynciterable", "dom"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
