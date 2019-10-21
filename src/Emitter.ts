@@ -1,5 +1,5 @@
-import SafeEmitter, { OneArgFn } from './SafeEmitter.js'
-import clone from './clone.js'
+import SafeEmitter, { OneArgFn } from './SafeEmitter'
+import clone from './clone'
 
 /** Function which takes an error. */
 type ErrFn = (err: Error) => void
@@ -24,6 +24,15 @@ export default class <T = void> extends SafeEmitter<T> {
             delete this.resolve
         }
         return this
+    }
+
+
+    /** 
+     * Calls `fn` the next time this is activated.
+     * Throws if it is deactivated, nothing if it is cancelled.
+     */
+    async once(fn: OneArgFn<T>) {
+        return super.once(fn).catch(throwError)
     }
 
     /** Gracefully stops handling events. */
