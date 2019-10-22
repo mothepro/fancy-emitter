@@ -52,17 +52,24 @@ cancellableAction.deactivate(Error('err'))
 Emitters can be merged with the helper
 
 ```typescript
+import {SafeEmitter, Emitter, merge} from 'fancy-emitter'
 const action = new SafeEmitter
 const actionNumber = new Emitter<number>()
 
 
-const merged = merge({ action, actionNumber })
-/* typeof merged == Emitter<{
-    name: "action"
-} | {
-    name: "actionNumber",
-    value: number
-}> */
+const merged = merge({ action, actionNumber })  // typeof merged == Emitter<
+                                                // { name: "action" } |
+                                                // { name: "actionNumber", value: number } >
+```
+
+Emitters can be cloned with the helper
+
+```typescript
+import {SafeEmitter, clone} from 'fancy-emitter'
+const original = new SafeEmitter<number>()
+const cloned = clone(original) // typeof SafeEmitter<number>
+
+original.activate(5) // activates cloned with `5` as well.
 ```
 
 ### Classic
