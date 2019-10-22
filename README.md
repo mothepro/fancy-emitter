@@ -49,6 +49,22 @@ or, with an error state by deactivating with the error
 cancellableAction.deactivate(Error('err'))
 ```
 
+Emitters can be merged with the helper
+
+```typescript
+const action = new SafeEmitter
+const actionNumber = new Emitter<number>()
+
+
+const merged = merge({ action, actionNumber })
+/* typeof merged == Emitter<{
+    name: "action"
+} | {
+    name: "actionNumber",
+    value: number
+}> */
+```
+
 ### Classic
 
 This can also be used like a classic event emitter with callbacks set to the `on` and `once` methods.

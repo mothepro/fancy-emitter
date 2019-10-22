@@ -12,7 +12,7 @@ type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
 type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
 
 /** The value an emitter returns. */
-type Unpack<E> = E extends SafeEmitter<infer T>
+export type Unpack<E> = E extends SafeEmitter<infer T>
     ? Exclude<T, void> // NonNullable<T> should work
     : never
 
@@ -33,7 +33,7 @@ type OneOfEmitters<T> = {
  *  the offending emitter. 
  * Cancellations of a given emitter do not stop the returned emitter.
  */
-export default function<E extends SafeEmitter<any>, Emitters extends { [name: string]: E }>(map: Emitters): E {
+export default function<Emitters extends { [name: string]: SafeEmitter<any> }>(map: Emitters) {
     const ret = new Emitter<OneOfEmitters<Emitters>>()
     for (const [name, emitter] of Object.entries(map))
         // Casting is required since TS doesn't know if `EmitterValue` is void or not.
@@ -44,5 +44,5 @@ export default function<E extends SafeEmitter<any>, Emitters extends { [name: st
                 err.emitter = name
                 ret.deactivate(err)
             })
-    return ret as any
+    return ret
 }
