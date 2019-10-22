@@ -9,14 +9,14 @@ This event emitter makes use of asynchronous functions and generators.
 Create a new emitter.
 
 ```typescript
-import Emitter from 'fancy-emitter'
-const action = new Emitter<number>();
+import {SafeEmitter} from 'fancy-emitter'
+const action = new SafeEmitter<number>()
 ```
 
 Set a listener on the action.
 
 ```typescript
-const value = await action.next
+const value: number = await action.next
 ```
 
 Or listen to many events which will occur.
@@ -29,15 +29,32 @@ for await (const value of action.all)
 
 Then activate the emitter whenever you please `action.activate(12)`
 
-The loop listeners may be gracefully broken out of with `action.cancel()`
-or by throwing an error with `action.deactivate(Error('err'))`.
+Emitters and their listeners can also be cancelled.
+To do this create an "unsafe" emitter instead.
+
+```typescript
+import {Emitter} from 'fancy-emitter'
+const cancellableAction = new Emitter<number>()
+```
+
+The loop listeners may be gracefully broken out of
+
+```typescript
+cancellableAction.cancel()
+```
+
+or, with an error state by deactivating with the error
+
+```typescript
+cancellableAction.deactivate(Error('err'))
+```
 
 ### Classic
 
 This can also be used like a classic event emitter with callbacks set to the `on` and `once` methods.
 
 ```typescript
-const action = new Emitter<string>()
+const action = new SafeEmitter<string>()
 
 action.on(data => console.log(data))
 
@@ -63,53 +80,24 @@ action.activate('this will be shown')
 setTimeout(() => action.activate('but this won\'t. Since it occurs AFTER the cancel has time to propagate'))
 ```
 
-Listeners can also be continued after an error occurs.
-
-```typescript
-const action = new Emitter<number>()
-
-action.on(data => console.log(data)) // 1 2
-action.onContinueAfterError(
-    data => console.log(data),
-    err => console.warn(err)) // 1 2 error 3
-
-action.activate(1)
-action.activate(2)
-action.deactivate(Error('error'))
-action.activate(3)
-```
+Take a look at the tests for more examples.
 
 ## API
 
-The emitter is the union between two interfaces.
+The emitter is the union between a few interfaces.
 
 + A Listener, which only detects when an event occurred.
 
 ```typescript
-interface Listener<T = void> {
-    // Resolves when event is activated. Rejects when event is deactivated or cancelled.
+interface Listener<T = void> extends AsyncIterable<T> {
+    // Resolves when event is activated.
+    // Rejects when event is deactivated or cancelled.
     readonly next: Promise<T>
-
-    // The lastest promise which has completed, or `undefined` if activated or deactivated.
-    readonly previous: Promise<T>
-
-    // Iterator over ALL events which have occurred and will occur.
-    readonly all: AsyncIterableIterator<T>
-
-    // Iterator over the FUTURE events which will occur.
-    readonly future: AsyncIterableIterator<T>
-
-    // Iterator over PAST events, which have already occurred.
-    readonly past: Promise<T>[]
-
-    // The number of times this event has been activated or deactivated.
-    readonly count: number
 
     once(fn: OneArgFn<T>): Promise<void>
     onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
     on(fn: OneArgFn<T>): Promise<void>
     onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
-    onContinueAfterError(fn: OneArgFn<T>, errFn?: (err: Error) => void): void
 }
 ```
 
@@ -117,7 +105,15 @@ interface Listener<T = void> {
 
 ```typescript
 interface Broadcaster<T = void> {
-    activate(...arg: Parameters<OneArgFn<T>>): this
+    // Argument can be omitted if arg is void.
+    activate(arg: T): this
+}
+```
+
++ Or an "unsafe" Brodcaster which can also trigger errors.
+
+```typescript
+interface UnsafeBroadcaster<T = void> extends Broadcaster<T> {
     deactivate(err: Error): this
     cancel(): this
 }
@@ -141,4 +137,10 @@ Use the CDN from unpkg!
 
 ```html
 <script src="//unpkg.com/fancy-emitter"></script>
+```
+
+Or as an ES module
+
+```html
+<script type="module" src="//unpkg.com/fancy-emitter/dist/esm/index.js"></script>
 ```

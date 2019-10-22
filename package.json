@@ -27,15 +27,13 @@
     "@types/mocha": "^5.2.6",
     "@types/should": "^13.0.0",
     "esm": "^3.2.25",
-    "mocha": "^6.1.2",
+    "mocha": "^6.2.2",
     "np": "^5.0.1",
     "should": "^13.2.3",
     "simplifyify": "^7.0.2",
     "terser": "^3.17.0",
     "ts-node": "^8.4.1",
+    "tsc-esm": "^1.0.2",
     "typescript": "^3.6.4"
-  },
-  "dependencies": {
-    "tsc-esm": "^1.0.2"
   }
 }
