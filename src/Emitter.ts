@@ -87,9 +87,9 @@ export default class <T = void> extends SafeEmitter<T> {
      *  the end of the current thread. Note: Activations have priority over this canceller.
      */
     // TODO: Optimize this by having listening on the async iterable instead of cloning.
-    onCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }): () => this {
+    onCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }) {
         const cloned = clone(this)
         cloned.on(fn).catch(errFn)
-        return cloned.cancel
+        return () => cloned.cancel()
     }
 }

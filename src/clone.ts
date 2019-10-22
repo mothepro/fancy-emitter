@@ -1,12 +1,12 @@
 import SafeEmitter from './SafeEmitter'
 import Emitter from './Emitter'
+import { Unpack } from './merge'
 
-export default function <T extends SafeEmitter<any> | Emitter<any>>(original: T) {
-    const clone = original instanceof SafeEmitter
-        ? new SafeEmitter<any>()
-        : new Emitter<any>()
-    const promise = original.on(clone.activate)
-    if (clone instanceof Emitter)
-        promise.catch(clone.deactivate)
-    return clone as T
+// TODO allow creation of SafeEmitters as well
+export default function <T extends SafeEmitter<any>>(original: T): Emitter<Unpack<T>> {
+    const clone = new Emitter<any>()
+    original
+        .on((arg: any) => clone.activate(arg))
+        .catch(err => clone.deactivate(err))
+    return clone
 }
