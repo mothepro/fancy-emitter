@@ -12,7 +12,7 @@ type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
 type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
 
 /** The value an emitter returns. */
-export type Unpack<E> = E extends SafeEmitter<infer T>
+type Unpack<E> = E extends SafeEmitter<infer T>
     ? Exclude<T, void> // NonNullable<T> should work
     : never
 
