@@ -66,10 +66,11 @@ Emitters can be cloned with the helper
 
 ```typescript
 import {SafeEmitter, clone} from 'fancy-emitter'
-const original = new SafeEmitter<number>()
-const cloned = clone(original) // typeof SafeEmitter<number>
+const original = new SafeEmitter<string>()
+const cloned = clone(original) // typeof SafeEmitter<string>
 
-original.activate(5) // activates cloned with `5` as well.
+cloned.once(str => console.log(`Hello ${str}`))
+original.activate('world')
 ```
 
 ### Classic
