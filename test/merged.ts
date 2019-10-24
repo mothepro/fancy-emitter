@@ -9,14 +9,19 @@ it('Create a merged emitter', done => {
     let actionTimes = 0,
         actionNumberTimes = 0
 
-    merged.on(({ name, value }) => {
-        if (value != undefined) {
-            actionNumberTimes++
-            name.should.eql('actionNumber')
-            value.should.eql(12)
-        } else {
-            actionTimes++
-            name.should.eql('action')
+    merged.on((event) => {
+        switch (event.name) {
+            case 'action':
+                actionTimes++
+                break
+            
+            case 'actionNumber':
+                actionNumberTimes++
+                event.value.should.eql(12)
+                break
+
+            default:
+                throw Error('merged events must be an "action" or "actionNumber".')
         }
 
         if (actionTimes == 2 && actionNumberTimes == 2)
