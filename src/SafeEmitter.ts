@@ -1,10 +1,10 @@
 /** A function which takes an argument if it isn't undefined. */
-export type OneArgFn<T> =
+export type OneArgFn<T, R = void> =
     Extract<T, void> extends never
-        ? (arg: T) => void      // T does NOT have void in it
+        ? (arg: T) => R      // T does NOT have void in it
         : Exclude<T, void> extends never
-            ? () => void        // T is ONLY void
-            : (arg?: T) => void // T is a combination of void and non void
+            ? () => R        // T is ONLY void
+            : (arg?: T) => R // T is a combination of void and non void
 
 /**
  * A new, light weight take on Node JS's EventEmitter class.
@@ -25,6 +25,15 @@ export default class <T = void> implements AsyncIterable<T> {
 
     protected readonly queue: Promise<T>[] = []
 
+    /** Triggers an event. */
+    readonly activate = ((arg?: T) => {
+        if (this.resolve) {
+            this.resolve(arg)
+            this.makePromise()
+        }
+        return this
+    }) as OneArgFn<T, this>
+
     /** 
      * Resolves next time this is activated.
      * Throws a TypeError if this is no longer making events.
@@ -38,16 +47,6 @@ export default class <T = void> implements AsyncIterable<T> {
     async*[Symbol.asyncIterator]() {
         while (this.queue.length)
             yield this.next
-    }
-
-    /** Triggers an event. */
-    activate(...arg: Parameters<OneArgFn<T>>): this
-    activate(arg?: T) {
-        if (this.resolve) {
-            this.resolve(arg)
-            this.makePromise()
-        }
-        return this
     }
 
     /** Calls `fn` the next time this is activated. */

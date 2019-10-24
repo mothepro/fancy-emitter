@@ -18,7 +18,7 @@ function throwError(err: Error): never | void {
 export default class <T = void> extends SafeEmitter<T> {
 
     /** Triggers an error and stops handling events. */
-    deactivate(err: Error) {
+    readonly deactivate = (err: Error) => {
         if (this.resolve) {
             this.resolve(Promise.reject(err))
             delete this.resolve
@@ -26,6 +26,8 @@ export default class <T = void> extends SafeEmitter<T> {
         return this
     }
 
+    /** Gracefully stops handling events. */
+    readonly cancel = () => this.deactivate(new CancelledEvent)
 
     /** 
      * Calls `fn` the next time this is activated.
@@ -33,11 +35,6 @@ export default class <T = void> extends SafeEmitter<T> {
      */
     async once(fn: OneArgFn<T>) {
         return super.once(fn).catch(throwError)
-    }
-
-    /** Gracefully stops handling events. */
-    cancel() {
-        return this.deactivate(new CancelledEvent)
     }
 
     /**

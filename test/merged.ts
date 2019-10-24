@@ -21,7 +21,7 @@ it('Create a merged emitter', done => {
                 break
 
             default:
-                throw Error('merged events must be an "action" or "actionNumber".')
+                throw Error(`merged event ${JSON.stringify(event)} must have a name of "action" or "actionNumber".`)
         }
 
         if (actionTimes == 2 && actionNumberTimes == 2)
