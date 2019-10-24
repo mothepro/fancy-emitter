@@ -8,7 +8,7 @@ describe('Simple fancy usage', () => {
     beforeEach(() => action = new Emitter)
 
     it('Next promise should resolve', async () => {
-        later(() => action.activate())
+        later(action.activate)
         await action.next
     })
 
@@ -30,10 +30,10 @@ describe('Simple fancy usage', () => {
     })
 
     it('should cancel an event', async () => {
-        later(() => action.activate())
-        later(() => action.activate())
-        later(() => action.cancel())
-        later(() => action.activate())
+        later(action.activate)
+        later(action.activate)
+        later(action.cancel)
+        later(action.activate)
 
         let times = 0
         for await (let _ of action)
@@ -42,11 +42,11 @@ describe('Simple fancy usage', () => {
     })
 
     it('should activate many times, then deactivate', async () => {
-        later(() => action.activate())
-        later(() => action.activate())
-        later(() => action.activate())
+        later(action.activate)
+        later(action.activate)
+        later(action.activate)
         later(() => action.deactivate(Error('nothing')))
-        later(() => action.activate())
+        later(action.activate)
 
         let times = 0,
             gotError = false

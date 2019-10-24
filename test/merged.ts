@@ -28,7 +28,7 @@ it('Create a merged emitter', done => {
             done()
     })
 
-    later(() => action.activate())
+    later(action.activate)
     merged.activate({ name: 'action' })
 
     later(() => actionNumber.activate(12))

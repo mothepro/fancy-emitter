@@ -87,6 +87,6 @@ export default class <T = void> extends SafeEmitter<T> {
     onCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }) {
         const cloned = clone(this)
         cloned.on(fn).catch(errFn)
-        return () => cloned.cancel()
+        return cloned.cancel
     }
 }

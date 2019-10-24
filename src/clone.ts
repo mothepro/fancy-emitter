@@ -5,8 +5,8 @@ export default function <T extends SafeEmitter<any>>(original: T) {
     const clone = original instanceof Emitter
         ? new Emitter<any>()
         : new SafeEmitter<any>()
-    const promise = original.on((arg: any) => clone.activate(arg))
+    const promise = original.on(clone.activate)
     if (clone instanceof Emitter)
-        promise.catch(err => clone.deactivate(err))
+        promise.catch(clone.deactivate)
     return clone as T
 }
