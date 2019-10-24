@@ -1,5 +1,5 @@
 import { Emitter } from '../index'
-import later from './later'
+import { later } from './util'
 
 let action: Emitter
 

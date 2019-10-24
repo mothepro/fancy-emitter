@@ -1,5 +1,5 @@
 import { merge, SafeEmitter, Emitter } from '../index'
-import later from './later'
+import { later } from './util'
 
 it('Create a merged emitter', done => {
     const action = new SafeEmitter
