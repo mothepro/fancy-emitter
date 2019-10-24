@@ -14,7 +14,7 @@
     "build:bundle": "npm run build:bundle:dev && npm run build:bundle:prod",
     "build:bundle:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
     "build:bundle:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
-    "build:esm": "tsc -t esnext -m es2015 --outDir dist/esm index",
+    "build:esm": "ttsc -p tsconfig.esm.json",
     "postbuild:esm": "tsc-esm dist/esm/index.js dist/esm/**/*.js",
     "build": "npm run build:npm && npm run build:bundle && npm run build:esm",
     "test": "mocha -r ts-node/register test/*.ts",
@@ -29,6 +29,7 @@
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "@types/should": "^13.0.0",
+    "@zoltu/typescript-transformer-append-js-extension": "^1.0.1",
     "esm": "^3.2.25",
     "mocha": "^6.2.2",
     "np": "^5.0.1",
@@ -36,7 +37,7 @@
     "simplifyify": "^7.0.2",
     "terser": "^3.17.0",
     "ts-node": "^8.4.1",
-    "tsc-esm": "^1.0.4",
+    "ttypescript": "^1.5.7",
     "typescript": "^3.6.4"
   }
 }
