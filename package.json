@@ -8,7 +8,7 @@
     "eventemitter",
     "strict"
   ],
-  "version": "1.1.0",
+  "version": "1.1.1",
   "scripts": {
     "build:npm": "tsc",
     "build:bundle": "npm run build:bundle:dev && npm run build:bundle:prod",
