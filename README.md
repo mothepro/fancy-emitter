@@ -129,7 +129,7 @@ interface Listener<T = void> extends AsyncIterable<T> {
 
 ```typescript
 interface Broadcaster<T = void> {
-    // Argument can be omitted if arg is void.
+    // Argument can be omitted iff arg is void.
     activate(arg: T): this
 }
 ```
