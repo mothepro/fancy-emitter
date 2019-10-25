@@ -15,7 +15,6 @@
     "build:bundle:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
     "build:bundle:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
     "build:esm": "ttsc -p tsconfig.esm.json",
-    "postbuild:esm": "tsc-esm dist/esm/index.js dist/esm/**/*.js",
     "build": "npm run build:npm && npm run build:bundle && npm run build:esm",
     "test": "mocha -r ts-node/register test/*.ts",
     "prerelease": "npm run build",
