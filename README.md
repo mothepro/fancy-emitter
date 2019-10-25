@@ -23,7 +23,7 @@ Or listen to many events which will occur.
 
 ```typescript
 let total = 0
-for await (const value of action.all)
+for await (const value of action)
   total += value
 ```
 
@@ -55,7 +55,6 @@ Emitters can be merged with the helper
 import {SafeEmitter, Emitter, merge} from 'fancy-emitter'
 const action = new SafeEmitter
 const actionNumber = new Emitter<number>()
-
 
 const merged = merge({ action, actionNumber })  // typeof merged == Emitter<
                                                 // { name: "action" } |
@@ -101,7 +100,7 @@ action.activate('hello')
 action.activate('world')
 
 action.activate('this will be shown')
-setTimeout(() => action.activate('but this won\'t. Since it occurs AFTER the cancel has time to propagate'))
+setTimeout(() => action.activate("this won't. Since it occurs AFTER the cancel has time to propagate"))
 ```
 
 Take a look at the tests for more examples.
