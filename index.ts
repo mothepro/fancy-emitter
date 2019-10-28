@@ -1,11 +1,5 @@
-import SafeEmitter from './src/SafeEmitter'
-import Emitter from './src/Emitter'
-import merge from './src/merge'
-import clone from './src/clone'
-
-export {
-    SafeEmitter,
-    Emitter,
-    merge,
-    clone,
-}
+export * from './src/types'
+export {default as SafeEmitter} from './src/SafeEmitter'
+export {default as Emitter} from './src/Emitter'
+export {default as merge} from './src/merge'
+export {default as clone} from './src/clone'

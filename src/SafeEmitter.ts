@@ -1,10 +1,4 @@
-/** A function which takes an argument if it isn't undefined. */
-export type OneArgFn<T, R = void> =
-    Extract<T, void> extends never
-        ? (arg: T) => R      // T does NOT have void in it
-        : Exclude<T, void> extends never
-            ? () => R        // T is ONLY void
-            : (arg?: T) => R // T is a combination of void and non void
+import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
 
 /**
  * A new, light weight take on Node JS's EventEmitter class.
@@ -14,7 +8,7 @@ export type OneArgFn<T, R = void> =
  *  + Generators
  *  + for-of-await
  */
-export default class <T = void> implements AsyncIterable<T> {
+export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
     constructor() {
         this.makePromise()

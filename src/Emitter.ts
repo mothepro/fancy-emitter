@@ -1,5 +1,6 @@
-import SafeEmitter, { OneArgFn } from './SafeEmitter'
+import SafeEmitter from './SafeEmitter'
 import clone from './clone'
+import { Broadcaster, Listener, OneArgFn } from './types'
 
 /** Function which takes an error. */
 type ErrFn = (err: Error) => void
@@ -15,7 +16,7 @@ function throwError(err: Error): never | void {
         throw err
 }
 
-export default class <T = void> extends SafeEmitter<T> {
+export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>, Listener<T> {
 
     /** Triggers an error and stops handling events. */
     readonly deactivate = (err: Error) => {
