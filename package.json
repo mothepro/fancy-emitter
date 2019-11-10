@@ -8,6 +8,12 @@
     "eventemitter",
     "strict"
   ],
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
   "version": "1.1.1",
   "scripts": {
     "build:npm": "tsc",
@@ -20,11 +26,6 @@
     "prerelease": "npm run build",
     "release": "np"
   },
-  "main": "dist/index.js",
-  "module": "dist/esm/index.js",
-  "files": [
-    "dist"
-  ],
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "@types/should": "^13.0.0",
