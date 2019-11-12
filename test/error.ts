@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { Emitter } from '../index'
-import { later, alotLater } from './util'
+import { later } from './util'
 
 let action: Emitter
 
@@ -84,7 +84,7 @@ describe('Classical Error Handling', () => {
       .cancel()
       .activate()
     
-    alotLater(() => {
+    later(() => {
       listener.should.have.been.calledTwice()
       done()
     })

@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { Emitter } from '../index'
-import { later, alotLater } from './util'
+import { later } from './util'
 
 let action: Emitter<number>
 
@@ -33,7 +33,7 @@ describe('Emitter with values', () => {
           .activate(2)
           .activate(3)
     
-    alotLater(() => {
+    later(() => {
       listener.should.have.been.calledThrice()
       listener.should.have.been.calledWith(1)
       listener.should.have.been.calledWith(2)
