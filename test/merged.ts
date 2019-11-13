@@ -1,36 +1,27 @@
+import { spy } from 'sinon'
 import { merge, SafeEmitter, Emitter } from '../index'
-import { later } from './util'
+import { later, alotLater } from './util'
 
 it('Create a merged emitter', done => {
-    const action = new SafeEmitter
-    const actionNumber = new Emitter<number>()
-    const merged = merge({ action, actionNumber })
+  const listener = spy()
+  const action = new SafeEmitter
+  const actionNumber = new Emitter<number>()
+  const merged = merge({ action, actionNumber })
 
-    let actionTimes = 0,
-        actionNumberTimes = 0
+  merged.on(listener)
 
-    merged.on((event) => {
-        switch (event.name) {
-            case 'action':
-                actionTimes++
-                break
-            
-            case 'actionNumber':
-                actionNumberTimes++
-                event.value.should.eql(12)
-                break
+  later(action.activate)
+  merged.activate({ name: 'action' })
 
-            default:
-                throw Error(`merged event ${JSON.stringify(event)} must have a name of "action" or "actionNumber".`)
-        }
+  later(() => actionNumber.activate(12))
+  merged.activate({ name: 'actionNumber', value: 12 })
 
-        if (actionTimes == 2 && actionNumberTimes == 2)
-            done()
-    })
-
-    later(action.activate)
-    merged.activate({ name: 'action' })
-
-    later(() => actionNumber.activate(12))
-    merged.activate({ name: 'actionNumber', value: 12 })
+  alotLater(() => {
+    listener.should.have.callCount(4)
+    listener.should.have.been.calledWith({ name: 'action' })
+    listener.should.have.been.calledWith({ name: 'action' })
+    listener.should.have.been.calledWith({ name: 'actionNumber', value:12 })
+    listener.should.have.been.calledWith({ name: 'actionNumber', value: 12 })
+    done()
+  })
 })

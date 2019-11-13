@@ -1,27 +1,15 @@
 import Emitter from './Emitter'
 import SafeEmitter from './SafeEmitter'
 
-/** Keys of an interface whose values are not `never`. */
-type NonNeverKeys<T> = { [P in keyof T]: T[P] extends never ? never : P }[keyof T]
-
-/** Keys of an interface whose values are `never`. */
-type NeverKeys<T> = Exclude<keyof T, NonNeverKeys<T>>
-
-/** Make the Keys with a `never` value optional. */
-// TODO: Use the new Omit utility type?
-type OptionalNeverProps<T> = { [P in NonNeverKeys<T>]: T[P] } & { [P in NeverKeys<T>]?: T[P] }
-
-/** The value an emitter returns. */
-type Unpack<E> = E extends SafeEmitter<infer T>
-    ? Exclude<T, void> // NonNullable<T> should work
-    : never
+/** The value an emitter is bound with. */
+type Unpack<E> = E extends SafeEmitter<infer T> ? T : void
 
 /** The return value for a merged emitter. */
 type OneOfEmitters<T> = {
-    [K in keyof T]: OptionalNeverProps<{
-        name: K
-        value: Unpack<T[K]>
-    }>
+    [K in keyof T]: Omit<{
+      name: K
+      value: Unpack<T[K]>
+    }, Unpack<T[K]> extends void ? 'value' : never>
 }[keyof T]
 
 /** 

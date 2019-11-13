@@ -1,46 +1,60 @@
-import 'should'
+import { spy } from 'sinon'
 import { SafeEmitter } from '../index'
+import { later } from './util'
 
 let action: SafeEmitter
 
 describe('Simple classical usage', () => {
-    beforeEach(() => action = new SafeEmitter)
+  beforeEach(() => (action = new SafeEmitter()))
 
-    it('activated once', done => {
-        action.once(done)
-        action.activate()
+  it('activated once', done => {
+    action.once(done)
+    action.activate()
+  })
+
+  it('activated three times', done => {
+    const listener = spy()
+
+    action.on(listener)
+    action
+      .activate()
+      .activate()
+      .activate()
+    
+    later(() => {
+      listener.should.have.been.calledThrice()
+      done()
     })
+  })
 
-    it('activated three times', done => {
-        let times = 0
-        action.on(() => {
-            if (++times == 3)
-                done()
-        })
+  it('activated more times', done => {
+    const listener = spy()
 
-        action.activate().activate().activate()
+    action.on(listener)
+    action.on(listener)
+    action
+      .activate()
+      .activate()
+      .activate()
+    
+    
+    later(() => {
+      listener.should.have.callCount(6)
+      done()
     })
+  })
 
-    it('activated more times', done => {
-        let times = 0
-        action.on(() => times++)
-        action.on(() => {
-            if (++times == 6)
-                done()
-        })
+  it("should activate both once's", done => {
+    const listener = spy()
+    
+    action.once(listener)
+    action.once(listener)
 
-        action.activate().activate().activate()
+    action.activate()
+
+    later(() => {
+      listener.should.have.been.calledTwice()
+      done()
     })
-
-    it('should activate both once\'s', done => {
-        let times = 0
-        const hit = () => {
-            if (++times >= 2)
-                done()
-        }
-        action.once(hit)
-        action.once(hit)
-
-        action.activate()
-    })
+  })
 })

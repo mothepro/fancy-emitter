@@ -8,3 +8,11 @@
 export function later(fn: Function) {
     setTimeout(fn)
 }
+
+/**
+ * Calls a function after all `later` calls.
+ * This can be used to assert after all activations have been fufilled.
+ */
+export function alotLater(fn: Function) {
+  setTimeout(fn, 10)
+}

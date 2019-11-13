@@ -1,3 +1,4 @@
+import { spy } from 'sinon'
 import { Emitter } from '../index'
 import { later } from './util'
 
@@ -74,16 +75,18 @@ describe('Classical Error Handling', () => {
         }
     })
 
-    it('cancel an event', done => {
-        let times = 0
-        action.on(() => {
-            if (++times >= 2)
-                done()
-        })
+  it('cancel an event', done => {
+    const listener = spy()
+    action.on(listener)
 
-        action.activate()
-            .activate()
-            .cancel()
-            .activate()
+    action.activate()
+      .activate()
+      .cancel()
+      .activate()
+    
+    later(() => {
+      listener.should.have.been.calledTwice()
+      done()
     })
+  })
 })
