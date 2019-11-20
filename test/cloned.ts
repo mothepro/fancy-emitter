@@ -1,4 +1,4 @@
-import { clone, SafeEmitter } from '../index'
+import { clone, SafeEmitter } from '../index.js'
 
 it('Create a cloned emitter', done => {
     const original = new SafeEmitter

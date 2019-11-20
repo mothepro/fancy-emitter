@@ -13,7 +13,7 @@ function log(element: HTMLPreElement, data: string) {
     element.innerHTML += '\n' + data
 }
 
-import { SafeEmitter, Emitter } from '../index'
+import { SafeEmitter, Emitter } from '../index.js'
 
 const txtEmitter = new Emitter<string>()
 const keyEmitter = new SafeEmitter<KeyboardEvent>()

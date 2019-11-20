@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
-import { Emitter } from '../index'
-import { later } from './util'
+import { Emitter } from '../index.js'
+import { later } from './util.js'
 
 let action: Emitter<number>
 

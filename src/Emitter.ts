@@ -1,6 +1,6 @@
-import SafeEmitter from './SafeEmitter'
-import clone from './clone'
-import { Broadcaster, Listener, OneArgFn } from './types'
+import SafeEmitter from './SafeEmitter.js'
+import clone from './clone.js'
+import { Broadcaster, Listener, OneArgFn } from './types.js'
 
 /** Function which takes an error. */
 type ErrFn = (err: Error) => void

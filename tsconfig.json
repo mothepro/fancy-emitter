@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "esnext",
+    "target": "es2019",
     "outDir": "dist",
     "sourceMap": true,
     "strict": true,
     "declaration": true,
-    "lib": ["esnext", "es2018", "esnext.asynciterable", "dom"],
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "moduleResolution": "node",
+    "lib": ["esnext", "dom"]
   },
-  "include": ["src/*", "test/*"]
+  "include": ["src/*", "tesbbt/*"]
 }

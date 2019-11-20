@@ -20,15 +20,14 @@
     "build:bundle": "npm run build:bundle:dev && npm run build:bundle:prod",
     "build:bundle:dev": "simplifyify index.ts -s emitter -o dist/umd/index.js --debug --bundle",
     "build:bundle:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
-    "build:esm": "ttsc -p tsconfig.esm.json",
-    "build": "npm run build:npm && npm run build:bundle && npm run build:esm",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "npm run build:npm && npm run build:esm && npm run build:bundle",
     "test": "mocha -r ts-node/register -r should -r should-sinon test/*.ts",
     "prerelease": "npm run build",
     "release": "np"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
-    "@types/should": "^13.0.0",
     "@types/should-sinon": "0.0.5",
     "@zoltu/typescript-transformer-append-js-extension": "^1.0.1",
     "esm": "^3.2.25",
