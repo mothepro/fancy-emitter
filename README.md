@@ -159,7 +159,10 @@ type OneArgFn<T> =
 Use the CDN from unpkg!
 
 ```html
-<script src="//unpkg.com/fancy-emitter"></script>
+<script src="//unpkg.com/fancy-emitter/dist/umd/index.js"></script>
+<script>
+  const {SafeEmitter} = emitter // The global variable `emitter` exposes the entire package.
+</script>
 ```
 
 Or as an ES module

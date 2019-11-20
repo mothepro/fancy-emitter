@@ -9,5 +9,5 @@
     "moduleResolution": "node",
     "lib": ["esnext", "dom"]
   },
-  "include": ["src/*", "tesbbt/*"]
+  // "include": ["src/*", "tesbbt/*"]
 }
