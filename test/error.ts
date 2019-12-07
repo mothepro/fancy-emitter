@@ -21,7 +21,7 @@ describe('Classical Error Handling', () => {
     it('cancelled, never activated nor deactivated', done => {
         action
             .once(() => done(Error('`fn` should never be called')))
-            .catch((e) => done(Error('`errFn` should never be called [[[' + e)))
+            .catch((e) => done(Error('`errFn` should never be called')))
 
         action.cancel()
         done()

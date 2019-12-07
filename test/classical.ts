@@ -5,7 +5,7 @@ import { later } from './util.js'
 let action: SafeEmitter
 
 describe('Simple classical usage', () => {
-  beforeEach(() => (action = new SafeEmitter()))
+  beforeEach(() => action = new SafeEmitter)
 
   it('activated once', done => {
     action.once(done)
@@ -20,7 +20,7 @@ describe('Simple classical usage', () => {
       .activate()
       .activate()
       .activate()
-    
+
     later(() => {
       listener.should.have.been.calledThrice()
       done()
@@ -36,8 +36,7 @@ describe('Simple classical usage', () => {
       .activate()
       .activate()
       .activate()
-    
-    
+
     later(() => {
       listener.should.have.callCount(6)
       done()
@@ -46,7 +45,7 @@ describe('Simple classical usage', () => {
 
   it("should activate both once's", done => {
     const listener = spy()
-    
+
     action.once(listener)
     action.once(listener)
 

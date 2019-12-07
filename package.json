@@ -22,7 +22,8 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:npm": "tsc",
     "build": "npm run build:npm && npm run build:esm && npm run build:bundle",
-    "test": "mocha -r ts-node/register -r should -r should-sinon test/*.ts",
+    "pretest": "npm run build:npm",
+    "test": "mocha -r should -r should-sinon dist/test/*.js",
     "prerelease": "npm run build",
     "release": "np"
   },

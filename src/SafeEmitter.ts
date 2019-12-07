@@ -1,4 +1,4 @@
-import { OneArgFn, SafeListener, SafeBroadcaster } from './types.js'
+import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
 
 /**
  * A new, light weight take on Node JS's EventEmitter class.

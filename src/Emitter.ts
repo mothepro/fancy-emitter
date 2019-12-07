@@ -1,17 +1,17 @@
 import SafeEmitter from './SafeEmitter.js'
 import clone from './clone.js'
-import { Broadcaster, Listener, OneArgFn } from './types.js'
+import { Broadcaster, Listener, OneArgFn } from './types'
 
 /** Function which takes an error. */
 type ErrFn = (err: Error) => void
 
 /** Reject an event with this error to gracefully end next iteration. */
-class CancelledEvent extends Error {
+export class CancelledEvent extends Error {
     message = 'Cancelled emitter gracefully'
 }
 
 /** Swallows cancelled errors, rethrows all other errors. */
-function throwError(err: Error): never | void {
+export function throwError(err: Error): never | void {
     if (!(err instanceof CancelledEvent))
         throw err
 }
@@ -32,7 +32,7 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
 
     /** 
      * Calls `fn` the next time this is activated.
-     * Throws if it is deactivated, nothing if it is cancelled.
+     * Throws if it is deactivated, NOOP if it is cancelled.
      */
     async once(fn: OneArgFn<T>) {
         return super.once(fn).catch(throwError)
