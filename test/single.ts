@@ -12,6 +12,7 @@ describe('Single usage', () => {
   })
 
   it('activated once', done => {
+    simple.triggered.should.be.false()
     simple.once(done)
     simple.activate()
   })
@@ -32,7 +33,9 @@ describe('Single usage', () => {
 
   it('activated once again with 12', async () => {
     later(() => advance.activate(12))
+    advance.triggered.should.be.false()
     const val = await advance.event
+    advance.triggered.should.be.true()
     val.should.eql(12)
   })
 
@@ -50,7 +53,7 @@ describe('Single usage', () => {
   it('cancelled, never activated nor deactivated', done => {
     advance
       .once(() => done(Error('`fn` should never be called')))
-      .catch((e) => done(Error('`errFn` should never be called')))
+      .catch(() => done(Error('`errFn` should never be called')))
 
     advance.cancel()
     done()
