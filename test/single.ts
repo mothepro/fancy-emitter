@@ -15,6 +15,7 @@ describe('Single usage', () => {
     simple.triggered.should.be.false()
     simple.once(done)
     simple.activate()
+    simple.triggered.should.be.true()
   })
 
   it("should activate both once's", done => {
