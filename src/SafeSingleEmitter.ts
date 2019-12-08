@@ -6,7 +6,7 @@ export default class <T = void> {
   activate!: OneArgFn<T>
 
   /** Whether the event has been triggered already. */
-  readonly triggered = false
+  readonly triggered: boolean = false
 
   /** Resolves when this is activated. */
   readonly event = new Promise<T>(r => this.activate = r as OneArgFn<T>)
