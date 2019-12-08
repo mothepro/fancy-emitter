@@ -2,12 +2,12 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2019",
-    "outDir": "dist",
+    "outDir": "dist/npm",
     "sourceMap": true,
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
     "lib": ["esnext", "dom"]
   },
-  // "include": ["src/*", "tesbbt/*"]
+  "exclude": ["dist"]
 }

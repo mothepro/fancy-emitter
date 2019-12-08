@@ -9,21 +9,21 @@
     "strict"
   ],
   "sideEffects": false,
-  "main": "dist/index.js",
+  "main": "dist/npm/index.js",
   "module": "dist/esm/index.js",
   "files": [
     "dist"
   ],
   "version": "1.2.0",
   "scripts": {
-    "build:bundle:dev": "simplifyify dist/index.js -s emitter -o dist/umd/index.js --debug --bundle",
+    "build:bundle:dev": "simplifyify dist/npm/index.js -s emitter -o dist/umd/index.js --debug --bundle",
     "build:bundle:prod": "terser dist/umd/index.js -cmo dist/umd/index.min.js",
     "build:bundle": "npm run build:bundle:dev && npm run build:bundle:prod",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:npm": "tsc",
     "build": "npm run build:npm && npm run build:esm && npm run build:bundle",
     "pretest": "npm run build:npm",
-    "test": "mocha -r should -r should-sinon dist/test/*.js",
+    "test": "mocha -r should -r should-sinon dist/npm/test/*.js",
     "prerelease": "npm run build",
     "release": "np"
   },
