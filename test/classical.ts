@@ -43,7 +43,7 @@ describe('Simple classical usage', () => {
     })
   })
 
-  it("should activate both once's", done => {
+  it('should activate both once\'s', done => {
     const listener = spy()
 
     action.once(listener)
@@ -53,6 +53,20 @@ describe('Simple classical usage', () => {
 
     later(() => {
       listener.should.have.been.calledTwice()
+      done()
+    })
+  })
+
+  it('should have a consistent calling order', done => {
+    let callOrder: number[] = []
+
+    action.once(() => callOrder.push(1))
+    action.on(() => callOrder.push(2))
+    action.once(() => callOrder.push(3))
+
+    action.activate()
+    later(() => {
+      callOrder.should.eql([1, 2, 3])
       done()
     })
   })
