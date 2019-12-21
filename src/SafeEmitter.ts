@@ -10,12 +10,13 @@ import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
  */
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
-  /**
-   * Creates a new Emitter.
-   * @param listeners Listeners to bind to immediately attach to this.
-   * Errors thrown will be ignored, since the promise will unhandled.
-   */
-  constructor(...listeners: OneArgFn<T>[]) {
+  constructor(
+    /**
+     * Listeners to attach immediately.
+     * Errors thrown will be ignored, as to not throw Unhandled promise exceptions.
+     */
+    ...listeners: OneArgFn<T>[]
+  ) {
     /*
      * Removes the c promise from the queue as soon as it has been resolved.
      *
