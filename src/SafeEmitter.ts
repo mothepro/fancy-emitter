@@ -10,17 +10,23 @@ import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
  */
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
-  constructor() {
+  /**
+   * Creates a new Emitter.
+   * @param listeners Listeners to bind to immediately attach to this.
+   * Errors thrown will be ignored, since the promise will unhandled.
+   */
+  constructor(...listeners: OneArgFn<T>[]) {
     /*
-     * Removes a promise from the queue as soon as it has been resolved.
-    
+     * Removes the c promise from the queue as soon as it has been resolved.
+     *
      * Anyone who listened to the promise before this point already has a
      * reference to the promise. When all listeners have handled the result
      * The promise can be safely GC'd.
      */
-    this
-      .on((() => this.queue.shift()) as OneArgFn<T>) // unsure why ths needs casting...
-      .catch(() => { }) // This is hidden, so it should never throw.
+    listeners.unshift((() => this.queue.shift()) as OneArgFn<T>) // unsure why ths needs casting...
+
+    for (const listener of listeners)
+      this.on(listener).catch(() => { })
   }
 
   protected resolve?: Function
