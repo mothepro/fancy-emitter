@@ -11,19 +11,29 @@ import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
   constructor() {
-    this.makePromise()
-    this.flusher()
+    /*
+     * Removes a promise from the queue as soon as it has been resolved.
+    
+     * Anyone who listened to the promise before this point already has a
+     * reference to the promise. When all listeners have handled the result
+     * The promise can be safely GC'd.
+     */
+    this
+      .on((() => this.queue.shift()) as OneArgFn<T>) // unsure why ths needs casting...
+      .catch(() => { }) // This is hidden, so it should never throw.
   }
 
   protected resolve?: Function
 
-  protected readonly queue: Promise<T>[] = []
+  protected readonly queue: Promise<T>[] = [
+    new Promise(resolve => this.resolve = resolve)
+  ]
 
   /** Triggers an event. */
   readonly activate = ((arg?: T) => {
     if (this.resolve) {
       this.resolve(arg)
-      this.makePromise()
+      this.queue.push(new Promise(resolve => this.resolve = resolve))
     }
     return this
   }) as OneArgFn<T, this>
@@ -55,26 +65,5 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
   async on(fn: OneArgFn<T>) {
     for await (const data of this)
       fn(data)
-  }
-
-  /** Add a new promise to the queue and save its resolve and rejector */
-  private makePromise() {
-    this.queue.push(new Promise(resolve => this.resolve = resolve))
-  }
-
-  /**
-   * Removes a promise from the queue as soon as it has been resolved.
-   * Anyone who listened to the promise before this point already has a
-   * reference to the promise. When all listeners have handled the result
-   * The promise can be safely GC'd.
-   * 
-   * This is hidden, so it should never throw.
-   */
-  // TODO: maybe flushing should be done with a chained `then` instead?
-  private async flusher() {
-    try {
-      for await (const _ of this)
-        this.queue.shift()
-    } catch { }
   }
 }

@@ -34,9 +34,7 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
      * Calls `fn` the next time this is activated.
      * Throws if it is deactivated, NOOP if it is cancelled.
      */
-    async once(fn: OneArgFn<T>) {
-        return super.once(fn).catch(throwError)
-    }
+    readonly once = async (fn: OneArgFn<T>) => super.once(fn).catch(throwError)
 
     /**
      * Dequeues a promise and yields it so it may be awaited on.
