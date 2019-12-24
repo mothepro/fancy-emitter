@@ -4,6 +4,7 @@
     "target": "es2019",
     "outDir": "dist/npm",
     "sourceMap": true,
+    "inlineSources": true,
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
