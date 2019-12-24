@@ -18,7 +18,7 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
     ...listeners: OneArgFn<T>[]
   ) {
     /*
-     * Removes the c promise from the queue as soon as it has been resolved.
+     * Removes the promise from the queue as soon as it has been resolved.
      *
      * Anyone who listened to the promise before this point already has a
      * reference to the promise. When all listeners have handled the result
