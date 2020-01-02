@@ -10,6 +10,12 @@ import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
  */
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
+  protected resolve?: Function
+
+  protected readonly queue: Promise<T>[] = [
+    new Promise(resolve => this.resolve = resolve)
+  ]
+
   constructor(
     /**
      * Listeners to attach immediately.
@@ -29,12 +35,6 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
     for (const listener of listeners)
       this.on(listener).catch(() => { })
   }
-
-  protected resolve?: Function
-
-  protected readonly queue: Promise<T>[] = [
-    new Promise(resolve => this.resolve = resolve)
-  ]
 
   /** Triggers an event. */
   readonly activate = ((arg?: T) => {

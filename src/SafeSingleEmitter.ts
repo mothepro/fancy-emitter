@@ -17,6 +17,17 @@ export default class <T = void> {
   /** Resolves when this is activated. */
   readonly event = new Promise<T>(resolve => this.resolve = resolve)
 
+  constructor(
+    /**
+     * Listeners to attach immediately.
+     * Errors thrown will be ignored, as to not throw Unhandled promise exceptions.
+     */
+    ...listeners: OneArgFn<T>[]
+  ) {
+    for (const listener of listeners)
+      this.once(listener).catch(() => { })
+  }
+
   /** Calls `fn` when this is activated. */
   async once(fn: OneArgFn<T>) {
     fn(await this.event)
