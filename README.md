@@ -8,12 +8,12 @@ This event emitter makes use of ES6 newset built in features, asynchronous funct
 
 | | `fancy-emitter` | Node.js `events`
 |-|-----------------|-----------------
-| **Strongly Typed** | [x] | [ ]
-| Asynchronous | [x] | [ ]
-| Iterable | [x] | [ ]
-| Cancellable Events | [x] | [ ]
-| Magic Events | [ ] | [x]
-| Memory Leaks | [ ] | [x]
+| **Strongly Typed** | ☑ | ☐
+| Asynchronous | ☑ | ☐
+| Iterable | ☑ | ☐
+| Cancellable Events | ☑ | ☐
+| Magic Events | ☐ | ☑
+| Memory Leaks | ☐ | ☑
 
 ## How to Use
 
