@@ -28,15 +28,15 @@
     "release": "np"
   },
   "devDependencies": {
-    "@types/mocha": "^5.2.6",
-    "@types/should-sinon": "0.0.5",
-    "mocha": "^6.2.2",
-    "np": "^5.0.1",
+    "@types/mocha": "^7.0.2",
+    "@types/should-sinon": "0.0.6",
+    "mocha": "^7.1.1",
+    "np": "^6.2.0",
     "should": "^13.2.3",
     "should-sinon": "0.0.6",
-    "simplifyify": "^7.0.2",
-    "sinon": "^7.5.0",
-    "terser": "^3.17.0",
-    "typescript": "^3.6.4"
+    "simplifyify": "^8.0.1",
+    "sinon": "^9.0.1",
+    "terser": "^4.6.10",
+    "typescript": "^3.8.3"
   }
 }
