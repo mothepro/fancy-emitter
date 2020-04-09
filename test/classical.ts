@@ -22,6 +22,7 @@ describe('Simple classical usage', () => {
       .activate()
 
     later(() => {
+      action.count.should.eql(3)
       listener.should.have.been.calledThrice()
       done()
     })
@@ -38,6 +39,7 @@ describe('Simple classical usage', () => {
       .activate()
 
     later(() => {
+      action.count.should.eql(3)
       listener.should.have.callCount(6)
       done()
     })
@@ -52,6 +54,7 @@ describe('Simple classical usage', () => {
     action.activate()
 
     later(() => {
+    action.count.should.eql(1)
       listener.should.have.been.calledTwice()
       done()
     })
@@ -65,7 +68,9 @@ describe('Simple classical usage', () => {
     action.once(() => callOrder.push(3))
 
     action.activate()
+    
     later(() => {
+      action.count.should.eql(1)
       callOrder.should.eql([1, 2, 3])
       done()
     })

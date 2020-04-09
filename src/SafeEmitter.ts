@@ -10,6 +10,9 @@ import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
  */
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
+  /** Number of times this has been activated. */
+  readonly count = 0
+
   protected resolve?: Function
 
   protected readonly queue: Promise<T>[] = [
@@ -24,13 +27,13 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
     ...listeners: OneArgFn<T>[]
   ) {
     /*
-     * Removes the promise from the queue as soon as it has been resolved.
+     * Increments the counter & removes the promise from the queue as soon as it has been resolved.
      *
      * Anyone who listened to the promise before this point already has a
      * reference to the promise. When all listeners have handled the result
      * The promise can be safely GC'd.
      */
-    listeners.unshift((() => this.queue.shift()) as OneArgFn<T>) // unsure why ths needs casting...
+    listeners.unshift((() => ++(this.count as number) && this.queue.shift()) as OneArgFn<T>) // unsure why ths needs casting...
 
     for (const listener of listeners)
       this.on(listener).catch(() => { })
@@ -45,6 +48,8 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
     return this
   }) as OneArgFn<T, this>
 
+  get [Symbol.toStringTag]() { return 'SafeEmitter' }
+
   /** 
    * Resolves next time this is activated.
    * Throws a TypeError if this is no longer making events.
@@ -52,8 +57,6 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
   // Chain a then to add a second microtick so that once & on match registration order
   // @see https://stackoverflow.com/questions/59263926/async-resolution-order-for-await-single-promise-vs-async-iterators/
   get next() { return this.queue[0].then(a => a) }
-
-  get [Symbol.toStringTag]() { return 'SafeEmitter' }
 
   /**
    * Dequeues a promise and yields it so it may be awaited on.

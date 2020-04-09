@@ -13,6 +13,7 @@ describe('Emitter with values', () => {
     action.activate(12)
 
     later(() => {
+      action.count.should.eql(1)
       listener.should.have.been.calledOnce()
       listener.should.have.been.calledWith(12)
       done()
@@ -34,6 +35,7 @@ describe('Emitter with values', () => {
           .activate(3)
     
     later(() => {
+      action.count.should.eql(3)
       listener.should.have.been.calledThrice()
       listener.should.have.been.calledWith(1)
       listener.should.have.been.calledWith(2)
