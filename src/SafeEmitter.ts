@@ -53,6 +53,8 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
   // @see https://stackoverflow.com/questions/59263926/async-resolution-order-for-await-single-promise-vs-async-iterators/
   get next() { return this.queue[0].then(a => a) }
 
+  get [Symbol.toStringTag]() { return 'SafeEmitter' }
+
   /**
    * Dequeues a promise and yields it so it may be awaited on.
    * A pending promise is enqueued everytime one is resolved.

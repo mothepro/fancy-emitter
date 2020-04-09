@@ -2,6 +2,8 @@ import { OneArgFn } from './types'
 
 /** An Emitter for just a single event. */
 export default class <T = void> {
+  get [Symbol.toStringTag]() { return 'SafeSingleEmitter' }
+
   private resolve!: Function
 
   /** Whether the event has been triggered already. */
