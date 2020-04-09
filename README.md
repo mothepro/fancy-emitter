@@ -2,7 +2,18 @@
 
 > A new take on JavaScript's EventEmitter class. Makes use of types and the newest JS features.
 
-This event emitter makes use of asynchronous functions and generators.
+This event emitter makes use of ES6 newset built in features, asynchronous functions and generators.
+
+## Comparison against Node.js 'events' module
+
+| | `fancy-emitter` | Node.js `events`
+|-|-----------------|-----------------
+| **Strongly Typed** | ☑ | ☒
+| Asynchronous | ☑ | ☒
+| Iterable | ☑ | ☒
+| Cancellable Events | ☑ | ☒
+| Magic Events | ☒ | ☑
+| Memory Leaks | ☒ | ☑
 
 ## How to Use
 
