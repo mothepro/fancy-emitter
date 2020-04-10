@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { SafeEmitter } from '../index.js'
-import { later } from './util.js'
+import later from './later.js'
 
 let action: SafeEmitter
 
@@ -54,7 +54,7 @@ describe('Simple classical usage', () => {
     action.activate()
 
     later(() => {
-    action.count.should.eql(1)
+      action.count.should.eql(1)
       listener.should.have.been.calledTwice()
       done()
     })
@@ -68,7 +68,7 @@ describe('Simple classical usage', () => {
     action.once(() => callOrder.push(3))
 
     action.activate()
-    
+
     later(() => {
       action.count.should.eql(1)
       callOrder.should.eql([1, 2, 3])

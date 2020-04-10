@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { merge, SafeEmitter, Emitter } from '../index.js'
-import { later, alotLater } from './util.js'
+import later from './later.js'
 
 it('Create a merged emitter', done => {
   const listener = spy()
@@ -16,7 +16,7 @@ it('Create a merged emitter', done => {
   later(() => actionNumber.activate(12))
   merged.activate({ name: 'actionNumber', value: 12 })
 
-  alotLater(() => {
+  later(() => {
     listener.should.have.callCount(4)
     listener.should.have.been.calledWith({ name: 'action' })
     listener.should.have.been.calledWith({ name: 'action' })

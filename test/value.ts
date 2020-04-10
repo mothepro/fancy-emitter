@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { Emitter } from '../index.js'
-import { later } from './util.js'
+import later from './later.js'
 
 let action: Emitter<number>
 
@@ -31,9 +31,9 @@ describe('Emitter with values', () => {
     action.on(listener)
 
     action.activate(1)
-          .activate(2)
-          .activate(3)
-    
+      .activate(2)
+      .activate(3)
+
     later(() => {
       action.count.should.eql(3)
       listener.should.have.been.calledThrice()

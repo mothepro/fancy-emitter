@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { SafeSingleEmitter, SingleEmitter } from '../index.js'
-import { later } from './util.js'
+import later from './later.js'
 
 let simple: SafeSingleEmitter
 let advance: SingleEmitter<number>
@@ -20,7 +20,7 @@ describe('Single usage', () => {
 
   it("should activate both once's", done => {
     const listener = spy()
-    
+
     simple.once(listener)
     simple.once(listener)
 

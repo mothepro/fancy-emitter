@@ -1,6 +1,6 @@
 import { spy } from 'sinon'
 import { Emitter } from '../index.js'
-import { later } from './util.js'
+import later from './later.js'
 
 let action: Emitter
 
@@ -8,7 +8,7 @@ describe('Simple fancy usage', () => {
   beforeEach(() => action = new Emitter)
 
   it('Next promise should resolve', async () => {
-    later(action.activate)
+    action.activate()
     await action.next
   })
 
@@ -31,14 +31,14 @@ describe('Simple fancy usage', () => {
 
   it('should cancel an event', async () => {
     const listener = spy()
-    later(action.activate)
+    action.activate()
     later(action.activate)
     later(action.cancel)
     later(action.activate)
 
     for await (let _ of action)
       listener()
-    
+
     listener.should.have.been.calledTwice()
   })
 
