@@ -11,7 +11,7 @@ import { OneArgFn, SafeListener, SafeBroadcaster } from './types'
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
 
   /** Number of times this has been activated. */
-  readonly count = 0
+  readonly count: number = 0
 
   protected resolve?: Function
 
