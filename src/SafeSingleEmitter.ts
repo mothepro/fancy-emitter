@@ -4,17 +4,13 @@ import { OneArgFn } from './types'
 export default class <T = void> {
   get [Symbol.toStringTag]() { return 'SafeSingleEmitter' }
 
-  private resolve!: Function
+  private resolve?: Function
 
   /** Whether the event has been triggered already. */
-  readonly triggered: boolean = false
+  get triggered() { return !this.resolve }
 
   /** Triggers the event. */
-  activate = ((arg: T) => {
-    // Do not chain promises since this should be updated ASAP
-    (this.triggered as boolean) = true // simple override
-    this.resolve(arg)
-  }) as OneArgFn<T>
+  activate = ((arg: T) => this.resolve && (this.resolve(arg) || delete this.resolve)) as OneArgFn<T>
 
   /** Resolves when this is activated. */
   readonly event = new Promise<T>(resolve => this.resolve = resolve)
