@@ -17,6 +17,7 @@ describe('Simple fancy usage', () => {
     const cancel = action.onCancellable(listener)
 
     action.activate().activate()
+    action.isAlive.should.be.true()
 
     return new Promise(resolve => later(() => {
       cancel()
@@ -40,6 +41,7 @@ describe('Simple fancy usage', () => {
       listener()
 
     listener.should.have.been.calledTwice()
+    action.isAlive.should.be.false()
   })
 
   it('should activate many times, then deactivate', async () => {
@@ -61,5 +63,6 @@ describe('Simple fancy usage', () => {
 
     listener.should.have.been.calledThrice()
     gotError.should.be.true()
+    action.isAlive.should.be.false()
   })
 })

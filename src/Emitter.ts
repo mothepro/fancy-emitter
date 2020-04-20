@@ -20,6 +20,9 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
   
   get [Symbol.toStringTag]() { return 'Emitter' }
 
+  /** Whether this emitter can still be activated, or deactived. */
+  get isAlive() { return !!this.resolve }
+
   /** Triggers an error and stops handling events. */
   readonly deactivate = (err: Error) => {
     if (this.resolve) {
