@@ -1,6 +1,7 @@
 import { OneArgFn } from './types'
 
 /** An Emitter for just a single event. */
+// TODO extend a promise directly so the emitter can just be `await`ed on.
 export default class <T = void> {
   get [Symbol.toStringTag]() { return 'SafeSingleEmitter' }
 

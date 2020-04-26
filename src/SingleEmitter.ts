@@ -6,8 +6,11 @@ import SafeSingleEmitter from './SafeSingleEmitter.js'
 export default class <T = void> extends SafeSingleEmitter<T> {
   get [Symbol.toStringTag]() { return 'SingleEmitter' }
 
+  /** Resolves when activated. Rejected when deactivated or cancelled. */
+  readonly event!: Promise<T>
+
   /** Triggers an error and stops handling events. */
-  readonly deactivate = (err: Error) => this.activate(Promise.reject(err) as unknown as T)
+  readonly deactivate = (err: Error) => !this.triggered && this.activate(Promise.reject(err) as unknown as T)
 
   /** Gracefully stops handling events. */
   readonly cancel = () => this.deactivate(new CancelledEvent)

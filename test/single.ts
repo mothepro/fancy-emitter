@@ -59,4 +59,12 @@ describe('Single usage', () => {
     advance.cancel()
     done()
   })
+
+  it('should not throw unhandled promise rejection for double deactivation', done => {
+    advance.cancel()
+    advance.deactivate(Error('deactivation'))
+    advance.cancel()
+
+    done()
+  })
 })

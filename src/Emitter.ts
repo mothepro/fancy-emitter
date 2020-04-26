@@ -11,7 +11,7 @@ export class CancelledEvent extends Error {
 }
 
 /** Swallows cancelled errors, rethrows all other errors. */
-export function throwError(err: Error): never | void {
+export function throwError(err: Error): asserts err is CancelledEvent {
   if (!(err instanceof CancelledEvent))
     throw err
 }
@@ -39,6 +39,7 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
    * Calls `fn` the next time this is activated.
    * Throws if it is deactivated, NOOP if it is cancelled.
    */
+  // Can't just add a .catch to the `next` since if awaited, it must resolve to something...
   readonly once = async (fn: OneArgFn<T>) => super.once(fn).catch(throwError)
 
   /**
