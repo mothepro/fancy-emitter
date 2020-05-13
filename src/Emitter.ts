@@ -1,9 +1,6 @@
 import SafeEmitter from './SafeEmitter.js'
 import clone from './clone.js'
-import { Broadcaster, Listener, OneArgFn } from './types'
-
-/** Function which takes an error. */
-type ErrFn = (err: Error) => void
+import { Broadcaster, Listener, OneArgFn, ErrFn } from './types'
 
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {
@@ -17,7 +14,7 @@ export function throwError(err: Error): asserts err is CancelledEvent {
 }
 
 export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>, Listener<T> {
-  
+
   get [Symbol.toStringTag]() { return 'Emitter' }
 
   /** Whether this emitter can still be activated, or deactived. */

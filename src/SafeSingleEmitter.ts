@@ -1,8 +1,8 @@
-import { OneArgFn } from './types'
+import { OneArgFn, SafeSingleBroadcaster, SafeSingleListener } from './types'
 
 /** An Emitter for just a single event. */
 // TODO extend a promise directly so the emitter can just be `await`ed on.
-export default class <T = void> {
+export default class <T = void> implements SafeSingleBroadcaster<T>, SafeSingleListener<T> {
   get [Symbol.toStringTag]() { return 'SafeSingleEmitter' }
 
   private resolve?: Function
@@ -17,18 +17,15 @@ export default class <T = void> {
   readonly event = new Promise<T>(resolve => this.resolve = resolve)
 
   constructor(
-    /**
-     * Listeners to attach immediately.
-     * Errors thrown will be ignored, as to not throw Unhandled promise exceptions.
-     */
+    /** Listeners to attach immediately. */
     ...listeners: OneArgFn<T>[]
   ) {
     for (const listener of listeners)
-      this.once(listener).catch(() => { })
+      this.once(listener)
   }
 
   /** Calls `fn` when this is activated. */
-  async once(fn: OneArgFn<T>) {
-    fn(await this.event)
+  once(fn: OneArgFn<T>) {
+    return this.event.then(fn)
   }
 }

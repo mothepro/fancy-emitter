@@ -165,6 +165,11 @@ type OneArgFn<T> =
             : (arg?: T) => void
 ```
 
+## Roadmap
+
++ In the future a handler to just handle deactivations
++ SingleEmitters should extend `Promise` directly
+
 ## CDN
 
 Use the CDN from unpkg!

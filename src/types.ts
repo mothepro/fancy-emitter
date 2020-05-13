@@ -6,8 +6,11 @@ export type OneArgFn<T, R = void> =
             ? () => R        // T is ONLY void
             : (arg?: T) => R // T is a combination of void and non void
 
+/** Function which takes an error. */
+export type ErrFn = (err: Error) => void
+
 export interface SafeBroadcaster<T = void> {
-  activate: OneArgFn<T, this>
+  readonly activate: OneArgFn<T, this>
 }
 
 export interface Broadcaster<T = void> extends SafeBroadcaster<T> {
@@ -28,4 +31,24 @@ export interface SafeListener<T = void> extends AsyncIterable<T> {
 export interface Listener<T = void> extends SafeListener<T> {
   onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
   onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+}
+
+export interface SafeSingleListener<T = void> {
+  readonly triggered: boolean
+  readonly event: Promise<T>
+  once(fn: OneArgFn<T>): Promise<void>
+}
+
+export interface SafeSingleBroadcaster<T = void> {
+  readonly activate: OneArgFn<T>
+}
+
+export interface SingleListener<T = void> extends SafeSingleListener<T> {
+  readonly triggered: boolean
+  once(fn: OneArgFn<T>): Promise<void>
+}
+
+export interface SingleBroadcaster<T = void> extends SafeSingleBroadcaster<T> {
+  deactivate(err: Error): void
+  cancel(): void
 }
