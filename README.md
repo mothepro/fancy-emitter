@@ -60,7 +60,7 @@ or, with an error state by deactivating with the error
 cancellableAction.deactivate(Error('err'))
 ```
 
-Emitters can be merged with the helper
+Emitters can be merged with the helper.
 
 ```typescript
 import {SafeEmitter, Emitter, merge} from 'fancy-emitter'
@@ -72,7 +72,7 @@ const merged = merge({ action, actionNumber })  // typeof merged == Emitter<
                                                 // { name: "actionNumber", value: number } >
 ```
 
-Emitters can be cloned with the helper
+Emitters can be cloned with the helper.
 
 ```typescript
 import {SafeEmitter, clone} from 'fancy-emitter'
@@ -81,6 +81,18 @@ const cloned = clone(original) // typeof SafeEmitter<string>
 
 cloned.once(str => console.log(`Hello ${str}`))
 original.activate('world')
+```
+
+Emitters can be filtered with the helper.
+
+```typescript
+import {SafeEmitter, filter} from 'fancy-emitter'
+const action = new SafeEmitter<string>()
+const promise = filter(action, 'hello')
+
+action.activate('hi')
+action.activate('hey')
+action.activate('hello') // promise is now resolved.
 ```
 
 ### Classic
