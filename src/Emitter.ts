@@ -16,7 +16,6 @@ export function throwError(err: Error): asserts err is CancelledEvent {
 }
 
 export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>, Listener<T> {
-
   get [Symbol.toStringTag]() { return 'Emitter' }
 
   /** Whether this emitter can still be activated, or deactived. */
@@ -56,45 +55,5 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
     } catch (err) {
       throwError(err)
     }
-  }
-
-  /**
-   * Calls `fn` the next time this is activated.
-   * 
-   * @param fn The function to be called once this is activated.
-   * @param errFn A function to be called if this is deactivated instead of
-   *  cancelled. By default `Error`'s are swallowed, otherwise the async function
-   *  called within would cause an `UnhandledPromiseRejection`.
-   * @returns a `Function` to cancel *this* specific listener.
-   */
-  onceCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }) {
-    let killer: Function
-    const rejector: Promise<never> = new Promise(
-      (_, reject) => killer = () => reject(new CancelledEvent))
-
-    Promise.race([this.next, rejector])
-      .then(fn)
-      .catch(throwError)
-      .catch(errFn)
-
-    return killer!
-  }
-
-  /**
-   * Calls a function every time this is activated.
-   * Stops after a cancellation or deactivation.
-   * 
-   * @param fn The function to be called once the emitter is activated.
-   * @param errFn A function to be called if the emitter is deactivated instead of
-   *  cancelled. By default `Error`'s are swallowed, otherwise the async function
-   *  called within would cause an `UnhandledPromiseRejection`.
-   * @returns a `Function` to cancel *this* specific listener at
-   *  the end of the current thread. Note: Activations have priority over this canceller.
-   */
-  // TODO: Optimize this by having listening on the async iterable instead of cloning.
-  onCancellable(fn: OneArgFn<T>, errFn: ErrFn = () => { }) {
-    const cloned = clone(this)
-    cloned.on(fn).catch(errFn)
-    return cloned.cancel
   }
 }

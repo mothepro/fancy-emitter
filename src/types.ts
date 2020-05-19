@@ -19,8 +19,7 @@ export interface Broadcaster<T = void> extends SafeBroadcaster<T> {
 }
 
 export interface SafeListener<T = void> extends AsyncIterable<T> {
-  // Resolves when event is activated.
-  // Rejects when event is deactivated or cancelled.
+  /** Resolves when event is activated. */
   readonly next: Promise<T>
   readonly count: number
 
@@ -29,8 +28,13 @@ export interface SafeListener<T = void> extends AsyncIterable<T> {
 }
 
 export interface Listener<T = void> extends SafeListener<T> {
-  onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
-  onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
+  /**
+   * Resolves when event is activated.
+   * Rejects when event is deactivated or cancelled.
+   * 
+   * Don't rely directly on this if planning to use cancelled functionality.
+   */
+  readonly next: Promise<T>
 }
 
 export interface SafeSingleListener<T = void> {

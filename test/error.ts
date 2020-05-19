@@ -1,6 +1,7 @@
 import { spy } from 'sinon'
 import { Emitter } from '../index.js'
 import later from './later.js'
+import { onceCancellable } from '../src/helpers/cancellable.js'
 
 let action: Emitter
 
@@ -28,12 +29,12 @@ describe('Classical Error Handling', () => {
   })
 
   it('activated once and not cancelled', done => {
-    action.onceCancellable(done)
+    onceCancellable(action, done)
     action.activate()
   })
 
   it('entirely cancelled before activation', done => {
-    action.onceCancellable(
+    onceCancellable(action,
       () => done(Error('`fn` should never be called')),
       () => done(Error('`errFn` should never be called')))
 
@@ -43,7 +44,7 @@ describe('Classical Error Handling', () => {
   })
 
   it('cancelled before activation', done => {
-    const cancel = action.onceCancellable(
+    const cancel = onceCancellable(action,
       () => done(Error('`fn` should never be called')),
       () => done(Error('`errFn` should never be called')))
     action.once(done)
@@ -53,7 +54,7 @@ describe('Classical Error Handling', () => {
   })
 
   it('deactivated before activation', done => {
-    action.onceCancellable(
+    onceCancellable(action,
       () => done(Error('never be called')),
       err => {
         err.message.should.eql('Deactivation')
@@ -67,7 +68,7 @@ describe('Classical Error Handling', () => {
     later(() => action.deactivate(Error('Deactivation')))
 
     try {
-      action.onceCancellable(() => Error('never be called'))
+      onceCancellable(action, () => Error('never be called'))
       await action.next
       throw 'Should not be reached'
     } catch (e) {

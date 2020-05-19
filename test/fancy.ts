@@ -1,6 +1,7 @@
 import { spy } from 'sinon'
 import { Emitter } from '../index.js'
 import later from './later.js'
+import { onCancellable } from '../src/helpers/cancellable.js'
 
 let action: Emitter
 
@@ -13,8 +14,8 @@ describe('Simple fancy usage', () => {
   })
 
   it('activated multiple times then cancel', async () => {
-    const listener = spy()
-    const cancel = action.onCancellable(listener)
+    const listener = spy(),
+      cancel = onCancellable(action, listener)
 
     action.activate().activate()
     action.isAlive.should.be.true()

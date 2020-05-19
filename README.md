@@ -95,6 +95,19 @@ action.activate('hey')
 action.activate('hello') // promise is now resolved.
 ```
 
+Emitters can be have listeners bound and later removed using the following helpers.
+
+```typescript
+import {onceCancellable, onCancellable} from 'fancy-emitter'
+const action = new Emitter<number>()
+const cancel = onCancellable(action, console.log)
+
+action.activate(1)
+action.activate(2)
+cancel()
+action.activate(3) // not console.log'd
+```
+
 ### Classic
 
 This can also be used like a classic event emitter with callbacks set to the `on` and `once` methods.
@@ -132,7 +145,7 @@ Take a look at the tests for more examples.
 
 The emitter is the union between a few interfaces.
 
-+ A Listener, which only detects when an event occurred.
++ A Listener (or SafeListener), which only detects when an event occurred.
 
 ```typescript
 interface Listener<T = void> extends AsyncIterable<T> {
@@ -141,16 +154,14 @@ interface Listener<T = void> extends AsyncIterable<T> {
     readonly next: Promise<T>
 
     once(fn: OneArgFn<T>): Promise<void>
-    onceCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
     on(fn: OneArgFn<T>): Promise<void>
-    onCancellable(fn: OneArgFn<T>, errFn?: (err: Error) => void): Function
 }
 ```
 
 + A Broadcaster which can only trigger events.
 
 ```typescript
-interface Broadcaster<T = void> {
+interface SafeBroadcaster<T = void> {
     // Argument can be omitted iff arg is void.
     activate(arg: T): this
 }
@@ -159,7 +170,7 @@ interface Broadcaster<T = void> {
 + Or an "unsafe" Brodcaster which can also trigger errors.
 
 ```typescript
-interface UnsafeBroadcaster<T = void> extends Broadcaster<T> {
+interface Broadcaster<T = void> extends Broadcaster<T> {
     deactivate(err: Error): this
     cancel(): this
 }

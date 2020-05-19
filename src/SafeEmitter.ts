@@ -11,6 +11,7 @@ const passthru = (arg: any) => arg
  *  + for-of-await
  */
 export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, SafeBroadcaster<T> {
+  get [Symbol.toStringTag]() { return 'SafeEmitter' }
 
   /** Number of times this has been activated. */
   readonly count: number = 0
@@ -49,8 +50,6 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
     }
     return this
   }) as OneArgFn<T, this>
-
-  get [Symbol.toStringTag]() { return 'SafeEmitter' }
 
   /** 
    * Resolves next time this is activated.
