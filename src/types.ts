@@ -32,7 +32,7 @@ export interface Listener<T = void> extends SafeListener<T> {
    * Resolves when event is activated.
    * Rejects when event is deactivated or cancelled.
    * 
-   * Don't rely directly on this if planning to use cancelled functionality.
+   * Do **not** rely directly on this if planning to use cancelled functionality.
    */
   readonly next: Promise<T>
 }

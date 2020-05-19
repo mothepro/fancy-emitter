@@ -1,6 +1,6 @@
 import type { OneArgFn, SafeListener, SafeBroadcaster } from './types'
 
-const passthru = (arg: any) => arg
+const passthru = <T>(arg: T) => arg
 
 /**
  * A new, light weight take on Node JS's EventEmitter class.
