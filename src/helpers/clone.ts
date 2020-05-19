@@ -1,5 +1,5 @@
-import SafeEmitter from './SafeEmitter.js'
-import Emitter from './Emitter.js'
+import SafeEmitter from '../SafeEmitter.js'
+import Emitter from '../Emitter.js'
 
 export default function <T extends SafeEmitter<any>>(original: T) {
     const clone = original instanceof Emitter

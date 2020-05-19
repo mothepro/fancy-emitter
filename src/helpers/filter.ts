@@ -1,5 +1,5 @@
-import type { SafeListener } from './types.js'
-import { throwError } from './Emitter.js'
+import type { SafeListener } from '../types.js'
+import { throwError } from '../Emitter.js'
 
 /** Resolves once the `emitter` activates with `value`. Rejects if the emitter deactivates */
 export async function filter<T>(emitter: SafeListener<T>, condition: (arg: T) => boolean) {

@@ -1,5 +1,5 @@
-import Emitter from './Emitter.js'
-import SafeEmitter from './SafeEmitter.js'
+import Emitter from '../Emitter.js'
+import SafeEmitter from '../SafeEmitter.js'
 
 /** The value an emitter is bound with. */
 type Unpack<E> = E extends SafeEmitter<infer T> ? T : void

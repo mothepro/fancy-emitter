@@ -1,5 +1,5 @@
 import SafeEmitter from './SafeEmitter.js'
-import clone from './clone.js'
+import clone from './helpers/clone.js'
 import type { Broadcaster, Listener, OneArgFn, ErrFn } from './types'
 
 const passthru = (arg: any) => arg
