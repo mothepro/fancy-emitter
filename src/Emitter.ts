@@ -1,6 +1,6 @@
 import SafeEmitter from './SafeEmitter.js'
 import clone from './clone.js'
-import { Broadcaster, Listener, OneArgFn, ErrFn } from './types'
+import type { Broadcaster, Listener, OneArgFn, ErrFn } from './types'
 
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {

@@ -1,4 +1,4 @@
-import { OneArgFn, SafeSingleBroadcaster, SafeSingleListener } from './types'
+import type { OneArgFn, SafeSingleBroadcaster, SafeSingleListener } from './types'
 
 /** An Emitter for just a single event. */
 // TODO extend a promise directly so the emitter can just be `await`ed on.

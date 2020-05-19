@@ -1,4 +1,4 @@
-import { OneArgFn, SingleBroadcaster, SingleListener, ErrFn } from './types'
+import type { OneArgFn, SingleBroadcaster, SingleListener, ErrFn } from './types'
 import { CancelledEvent, throwError } from './Emitter.js'
 import SafeSingleEmitter from './SafeSingleEmitter.js'
 
