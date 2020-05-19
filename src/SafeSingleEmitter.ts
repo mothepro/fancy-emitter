@@ -22,6 +22,7 @@ export default class <T = void> implements SafeSingleBroadcaster<T>, SafeSingleL
   ) {
     for (const listener of listeners)
       this.once(listener)
+        .catch(() => {}) // Swallow errors since we can't listen to them here.
   }
 
   /** Calls `fn` when this is activated. */
