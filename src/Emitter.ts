@@ -2,6 +2,8 @@ import SafeEmitter from './SafeEmitter.js'
 import clone from './clone.js'
 import type { Broadcaster, Listener, OneArgFn, ErrFn } from './types'
 
+const passthru = (arg: any) => arg
+
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {
   message = 'Cancelled emitter gracefully'
@@ -38,6 +40,10 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
    */
   // Can't just add a .catch to the `next` since if awaited, it must resolve to something...
   readonly once = async (fn: OneArgFn<T>) => super.once(fn).catch(throwError)
+
+  // Chain 2 more passthrus since the aysncIterator's `yield*` cost 2 microticks.
+  // One for `yield` and again for the 'special passthru yield' (`yield*`)
+  get next() { return super.next.then(passthru).then(passthru) }
 
   /**
    * Dequeues a promise and yields it so it may be awaited on.

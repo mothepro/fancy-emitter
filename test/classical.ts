@@ -61,7 +61,7 @@ describe('Simple classical usage', () => {
   })
 
   it('should have a consistent calling order', done => {
-    let callOrder: number[] = []
+    const callOrder: number[] = []
 
     action.once(() => callOrder.push(1))
     action.on(() => callOrder.push(2))
