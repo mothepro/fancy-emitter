@@ -35,6 +35,7 @@ export interface Listener<T = void> extends SafeListener<T> {
    * Do **not** rely directly on this if planning to use cancelled functionality.
    */
   readonly next: Promise<T>
+  readonly isAlive: boolean
 }
 
 export interface SafeSingleListener<T = void> {
