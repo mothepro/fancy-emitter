@@ -1,32 +1,28 @@
 import type { OneArgFn, SafeSingleBroadcaster, SafeSingleListener } from './types'
 
 /** An Emitter for just a single event. */
-// TODO extend a promise directly so the emitter can just be `await`ed on.
-export default class <T = void> implements SafeSingleBroadcaster<T>, SafeSingleListener<T> {
+export default class <T = void> extends Promise<T> implements SafeSingleBroadcaster<T>, SafeSingleListener<T> {
   get [Symbol.toStringTag]() { return 'SafeSingleEmitter' }
 
-  private resolve?: Function
+  /** Whether this has been activated already. */
+  readonly triggered: boolean
 
-  /** Whether the event has been triggered already. */
-  get triggered() { return !this.resolve }
+  /** Resolves this promise. */
+  readonly activate: OneArgFn<T, this>
 
-  /** Triggers the event. */
-  activate = ((arg: T) => this.resolve && (this.resolve(arg) || delete this.resolve)) as OneArgFn<T>
+  // @ts-ignore This actually is allowed
+  constructor() {
+    let resolve: Function
+    if (typeof arguments[0] == 'function') // Required Native Promise handling
+      super(arguments[0])
+    else
+      super(ok => resolve = ok)
 
-  /** Resolves when this is activated. */
-  readonly event = new Promise<T>(resolve => this.resolve = resolve)
-
-  constructor(
-    /** Listeners to attach immediately. */
-    ...listeners: OneArgFn<T>[]
-  ) {
-    for (const listener of listeners)
-      this.once(listener)
-        .catch(() => {}) // Swallow errors since we can't listen to them here.
-  }
-
-  /** Calls `fn` when this is activated. */
-  once(fn: OneArgFn<T>) {
-    return this.event.then(fn)
+    this.triggered = false
+    this.activate = ((arg: T) => {
+      (this.triggered as boolean) = true
+      resolve(arg)
+      return this
+    }) as OneArgFn<T, this>
   }
 }

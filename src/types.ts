@@ -38,10 +38,8 @@ export interface Listener<T = void> extends SafeListener<T> {
   readonly isAlive: boolean
 }
 
-export interface SafeSingleListener<T = void> {
+export interface SafeSingleListener<T = void> extends Promise<T> {
   readonly triggered: boolean
-  readonly event: Promise<T>
-  once(fn: OneArgFn<T>): Promise<void>
 }
 
 export interface SafeSingleBroadcaster<T = void> {
@@ -49,8 +47,8 @@ export interface SafeSingleBroadcaster<T = void> {
 }
 
 export interface SingleListener<T = void> extends SafeSingleListener<T> {
-  readonly triggered: boolean
-  once(fn: OneArgFn<T>): Promise<void>
+  readonly deactivated: boolean
+  readonly cancelled: boolean
 }
 
 export interface SingleBroadcaster<T = void> extends SafeSingleBroadcaster<T> {
