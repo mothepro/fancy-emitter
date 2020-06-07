@@ -190,8 +190,21 @@ type OneArgFn<T> =
 
 ## Roadmap
 
-+ In the future a handler to just handle deactivations
-+ SingleEmitters should extend `Promise` directly
+<details>
+
+  <summary>Possibly, a handler for just deactivations</summary>
+
+This would be a shorthand for the `fn` function here.
+
+```typescript
+try {
+  for await (const _ of emitter);
+} catch(err) {
+  fn(err)
+}
+```
+
+</details>
 
 ## CDN
 
