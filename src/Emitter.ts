@@ -1,8 +1,5 @@
 import SafeEmitter from './SafeEmitter.js'
-import clone from './helpers/clone.js'
-import type { Broadcaster, Listener, OneArgFn, ErrFn } from './types'
-
-const passthru = <T>(arg: T) => arg
+import { Broadcaster, Listener, OneArgFn, passthru } from './types'
 
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {
