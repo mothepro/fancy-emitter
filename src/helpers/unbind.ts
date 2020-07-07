@@ -1,5 +1,4 @@
-import { Emitter } from '../../index.js'
-import { SafeBroadcaster, Broadcaster } from '../types.js'
+import type { SafeBroadcaster, Broadcaster } from '../types.js'
 
 type Key = string | number | symbol
 

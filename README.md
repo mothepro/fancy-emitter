@@ -121,24 +121,6 @@ action.activate('hello')
 action.activate('world')
 ```
 
-These listeners provide more functionality in that they can be cancelled.
-
-```typescript
-const action = new Emitter<string>()
-
-const cancel = action.onCancellable(data => console.log(data))
-action.once(str => {
-    if (str == 'world')
-        cancel()
-})
-
-action.activate('hello')
-action.activate('world')
-
-action.activate('this will be shown')
-setTimeout(() => action.activate("this won't. Since it occurs AFTER the cancel has time to propagate"))
-```
-
 Take a look at the tests for more examples.
 
 ## API
@@ -155,6 +137,14 @@ interface Listener<T = void> extends AsyncIterable<T> {
 
     once(fn: OneArgFn<T>): Promise<void>
     on(fn: OneArgFn<T>): Promise<void>
+}
+```
+
++ Or an "unsafe" Listener which can eventually finish emitting.
+
+```typescript
+export interface Listener<T = void> extends SafeListener<T> {
+  readonly isAlive: boolean
 }
 ```
 

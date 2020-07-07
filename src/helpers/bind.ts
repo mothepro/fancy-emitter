@@ -1,5 +1,5 @@
 import SafeEmitter from '../SafeEmitter.js'
-import { Emitter } from '../../index.js'
+import Emitter from '../Emitter.js'
 
 type Key = string | number | symbol
 
