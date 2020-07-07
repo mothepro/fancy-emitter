@@ -2,13 +2,13 @@ import type { SafeListener } from '../types.js'
 import { throwError } from '../Emitter.js'
 
 /**
- * Resolves with `true` once the `emitter` activates with `value`.
+ * Resolves with `true` once the `emitter` activates with a `value` that makes the `condition` return true.
  * Rejects if the emitter deactivates
  * Resolves with `false` if cancelled.
  * 
- * Usually the boolean returned can be ignored...
+ * By default, the `condition` always returns false, meaning this function can be used to await the end of an emitter.
  */
-export async function filter<T>(emitter: SafeListener<T>, condition: (arg: T) => boolean) {
+export async function filter<T>(emitter: SafeListener<T>, condition: (arg: T) => boolean = () => false) {
   try {
     for await (const current of emitter)
       if (condition(current))
