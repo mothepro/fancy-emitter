@@ -1,4 +1,4 @@
-import { OneArgFn, SafeListener, SafeBroadcaster, passthru } from './types'
+import type { OneArgFn, SafeListener, SafeBroadcaster } from './types'
 
 /**
  * A new, light weight take on Node JS's EventEmitter class.
@@ -55,7 +55,7 @@ export default class <T = void> implements AsyncIterable<T>, SafeListener<T>, Sa
    */
   // Chain a then to add a second microtick so that once & on match registration order
   // @see https://stackoverflow.com/questions/59263926/async-resolution-order-for-await-single-promise-vs-async-iterators/
-  get next() { return this.queue[0].then(passthru) }
+  get next() { return this.queue[0].then() }
 
   /**
    * Dequeues a promise and yields it so it may be awaited on.

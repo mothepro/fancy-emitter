@@ -1,6 +1,3 @@
-/** Returns the argument passed. */
-export const passthru = <T>(arg: T) => arg
-
 /** A function which takes an argument if it isn't undefined. */
 export type OneArgFn<T, R = void> =
     Extract<T, void> extends never

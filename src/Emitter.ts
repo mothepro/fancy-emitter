@@ -1,5 +1,5 @@
 import SafeEmitter from './SafeEmitter.js'
-import { Broadcaster, Listener, OneArgFn, passthru } from './types'
+import type { Broadcaster, Listener, OneArgFn } from './types'
 
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {
@@ -39,7 +39,7 @@ export default class <T = void> extends SafeEmitter<T> implements Broadcaster<T>
 
   // Chain 2 more passthrus since the aysncIterator's `yield*` cost 2 microticks.
   // One for `yield` and again for the 'special passthru yield' (`yield*`)
-  get next() { return super.next.then(passthru).then(passthru) }
+  get next() { return super.next.then().then() }
 
   /**
    * Dequeues a promise and yields it so it may be awaited on.
