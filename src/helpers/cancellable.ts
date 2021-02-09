@@ -1,4 +1,4 @@
-import type { OneArgFn, ErrFn, Listener } from '../types.js'
+import type { OneArgFn, ErrFn, Listener } from '../../index'
 import { CancelledEvent, throwError } from '../Emitter.js'
 import clone from './clone.js'
 import { Emitter } from '../../index.js'

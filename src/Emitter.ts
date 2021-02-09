@@ -1,5 +1,5 @@
+import type { Broadcaster, Listener, OneArgFn } from '../index'
 import SafeEmitter from './SafeEmitter.js'
-import type { Broadcaster, Listener, OneArgFn } from './types'
 
 /** Reject an event with this error to gracefully end next iteration. */
 export class CancelledEvent extends Error {

@@ -1,4 +1,4 @@
-import type { SafeListener } from '../types.js'
+import type { SafeListener } from '../../index'
 import { throwError } from '../Emitter.js'
 
 /**

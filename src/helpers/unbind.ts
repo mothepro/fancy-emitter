@@ -1,4 +1,4 @@
-import type { SafeBroadcaster, Broadcaster } from '../types.js'
+import type { SafeBroadcaster, Broadcaster } from '../../index'
 
 type Key = string | number | symbol
 
